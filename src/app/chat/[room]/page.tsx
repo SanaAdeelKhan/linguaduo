@@ -34,7 +34,7 @@ export default function ChatRoom() {
     if (roomName?.startsWith('dm_')) {
       const parts = roomName.split('_')
       const otherId = parts.find(p => p !== String(user.id) && p !== 'dm')
-      fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/accounts/users/${otherId}/`, {
+      fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/users/${otherId}/`, {
         headers: { Authorization: `Bearer ${access}` }
       })
         .then(r => r.json())
