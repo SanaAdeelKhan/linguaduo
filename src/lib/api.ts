@@ -3,6 +3,7 @@ import { useAuthStore } from '@/store/authStore'
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
+  timeout: 60000, // 60 seconds for Render cold start
 })
 
 api.interceptors.request.use((config) => {
