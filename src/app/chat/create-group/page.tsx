@@ -3,8 +3,19 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuthStore } from '@/store/authStore'
 import api from '@/lib/api'
-import { ArrowLeft, Users, Check } from 'lucide-react'
+import { ArrowLeft, Check, Users } from 'lucide-react'
 import Link from 'next/link'
+
+const AVATAR_COLORS = [
+  { bg: '#d4af3722', color: '#d4af37' },
+  { bg: '#7c3aed22', color: '#9b8fd4' },
+  { bg: '#c0587822', color: '#e87da0' },
+  { bg: '#6b7c1322', color: '#a3b435' },
+  { bg: '#1e40af22', color: '#60a5fa' },
+]
+function getAvatarColor(name: string) {
+  return AVATAR_COLORS[name.charCodeAt(0) % AVATAR_COLORS.length]
+}
 
 export default function CreateGroupPage() {
   const router = useRouter()
@@ -23,22 +34,16 @@ export default function CreateGroupPage() {
   }, [user])
 
   const toggleUser = (id: number) => {
-    setSelectedIds(prev =>
-      prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
-    )
+    setSelectedIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id])
   }
 
   const handleCreate = async () => {
     if (!name.trim()) { setError('Group name is required.'); return }
     if (selectedIds.length === 0) { setError('Add at least one member.'); return }
-    setLoading(true)
-    setError('')
+    setLoading(true); setError('')
     try {
       const res = await api.post('/api/chat/groups/create/', {
-        name: name.trim(),
-        description,
-        is_study_group: isStudyGroup,
-        member_ids: selectedIds,
+        name: name.trim(), description, is_study_group: isStudyGroup, member_ids: selectedIds,
       })
       router.push(`/chat/group_${res.data.id}`)
     } catch (e: any) {
@@ -47,70 +52,68 @@ export default function CreateGroupPage() {
     setLoading(false)
   }
 
+  const inputStyle = {
+    width: '100%', background: 'var(--bg-tertiary)', border: '0.5px solid var(--border)',
+    borderRadius: 10, padding: '10px 14px', fontSize: 13,
+    color: 'var(--text-primary)', outline: 'none',
+  }
+
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col max-w-lg mx-auto">
-      {/* Header */}
-      <div className="bg-indigo-600 text-white px-4 py-3 flex items-center gap-3">
-        <Link href="/chat" className="text-indigo-200 hover:text-white">
-          <ArrowLeft size={22} />
-        </Link>
-        <h2 className="font-semibold">Create Group</h2>
+    <div style={{ minHeight: '100vh', background: 'var(--bg-primary)', display: 'flex', flexDirection: 'column', maxWidth: 480, margin: '0 auto' }}>
+      <div style={{ background: 'var(--bg-tertiary)', padding: '12px 14px', display: 'flex', alignItems: 'center', gap: 12, borderBottom: '0.5px solid var(--border)' }}>
+        <Link href="/chat" style={{ color: 'var(--text-muted)', display: 'flex' }}><ArrowLeft size={20} /></Link>
+        <h2 style={{ fontSize: 15, fontWeight: 500, color: 'var(--gold)' }}>Create Group</h2>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {/* Group name */}
-        <div className="bg-white rounded-2xl p-4 shadow-sm space-y-3">
-          <h3 className="text-sm font-semibold text-gray-700">Group Info</h3>
-          <input
-            value={name}
-            onChange={e => setName(e.target.value)}
-            placeholder="Group name *"
-            className="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          />
-          <input
-            value={description}
-            onChange={e => setDescription(e.target.value)}
-            placeholder="Description (optional)"
-            className="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          />
-          <label className="flex items-center gap-2 cursor-pointer">
+      <div style={{ flex: 1, overflowY: 'auto', padding: 16, display: 'flex', flexDirection: 'column', gap: 14 }}>
+
+        {/* Group info */}
+        <div style={{ background: 'var(--bg-secondary)', borderRadius: 14, padding: 16, border: '0.5px solid var(--border)', display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <p style={{ fontSize: 12, fontWeight: 500, color: 'var(--gold)', marginBottom: 4 }}>Group Info</p>
+          <input value={name} onChange={e => setName(e.target.value)} placeholder="Group name *" style={inputStyle} />
+          <input value={description} onChange={e => setDescription(e.target.value)} placeholder="Description (optional)" style={inputStyle} />
+          <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
             <input type="checkbox" checked={isStudyGroup} onChange={e => setIsStudyGroup(e.target.checked)}
-              className="w-4 h-4 accent-indigo-600" />
-            <span className="text-sm text-gray-600">📚 Mark as Study Group</span>
+              style={{ width: 15, height: 15, accentColor: 'var(--gold)' }} />
+            <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>📚 Mark as Study Group</span>
           </label>
         </div>
 
         {/* Member selection */}
-        <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
-          <div className="px-4 py-3 border-b flex items-center justify-between">
-            <h3 className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-              <Users size={16} /> Add Members
-            </h3>
-            <span className="text-xs text-indigo-600 font-medium">{selectedIds.length} selected</span>
+        <div style={{ background: 'var(--bg-secondary)', borderRadius: 14, border: '0.5px solid var(--border)', overflow: 'hidden' }}>
+          <div style={{ padding: '12px 16px', borderBottom: '0.5px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <p style={{ fontSize: 12, fontWeight: 500, color: 'var(--gold)', display: 'flex', alignItems: 'center', gap: 6 }}>
+              <Users size={13} /> Add Members
+            </p>
+            <span style={{ fontSize: 11, color: 'var(--purple)' }}>{selectedIds.length} selected</span>
           </div>
-          {allUsers.map(u => (
-            <button key={u.id} onClick={() => toggleUser(u.id)}
-              className="flex items-center gap-3 w-full px-4 py-3 hover:bg-gray-50 border-b transition text-left">
-              <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold">
-                {u.username[0].toUpperCase()}
-              </div>
-              <div className="flex-1">
-                <p className="text-sm font-medium text-gray-900">{u.username}</p>
-                <p className="text-xs text-gray-400">{u.preferred_language}</p>
-              </div>
-              {selectedIds.includes(u.id) && (
-                <div className="w-6 h-6 rounded-full bg-indigo-600 flex items-center justify-center">
-                  <Check size={14} className="text-white" />
+          {allUsers.map(u => {
+            const { bg, color } = getAvatarColor(u.username)
+            const selected = selectedIds.includes(u.id)
+            return (
+              <button key={u.id} onClick={() => toggleUser(u.id)}
+                style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: '10px 16px', background: selected ? 'var(--bg-hover)' : 'none', border: 'none', borderBottom: '0.5px solid var(--border)', cursor: 'pointer', transition: 'background 0.15s' }}>
+                <div style={{ width: 36, height: 36, borderRadius: '50%', background: bg, color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 500 }}>
+                  {u.username[0].toUpperCase()}
                 </div>
-              )}
-            </button>
-          ))}
+                <div style={{ flex: 1, textAlign: 'left' }}>
+                  <p style={{ fontSize: 13, color: 'var(--text-primary)' }}>{u.username}</p>
+                  <p style={{ fontSize: 10, color: 'var(--text-muted)' }}>{u.preferred_language}</p>
+                </div>
+                {selected && (
+                  <div style={{ width: 22, height: 22, borderRadius: '50%', background: 'var(--gold)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Check size={13} color="#1a1a2e" />
+                  </div>
+                )}
+              </button>
+            )
+          })}
         </div>
 
-        {error && <p className="text-red-500 text-sm text-center">{error}</p>}
+        {error && <p style={{ color: 'var(--pink)', fontSize: 13, textAlign: 'center' }}>{error}</p>}
 
         <button onClick={handleCreate} disabled={loading}
-          className="w-full bg-indigo-600 text-white py-3 rounded-2xl font-semibold text-sm hover:bg-indigo-700 transition disabled:opacity-50">
+          style={{ background: 'var(--gold)', color: '#1a1a2e', border: 'none', borderRadius: 22, padding: '12px 0', fontSize: 14, fontWeight: 600, cursor: 'pointer', opacity: loading ? 0.6 : 1, transition: 'opacity 0.2s' }}>
           {loading ? 'Creating...' : '🚀 Create Group'}
         </button>
       </div>

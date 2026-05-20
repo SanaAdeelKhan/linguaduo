@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation'
 import { useAuthStore } from '@/store/authStore'
 import api from '@/lib/api'
 import Link from 'next/link'
-import { MessageCircle, Users, LogOut, Globe } from 'lucide-react'
+import { MessageCircle, Users, LogOut, Globe, Search, Plus } from 'lucide-react'
 
 interface Conversation {
   type: 'dm' | 'group'
@@ -21,6 +21,33 @@ const LANG_NAMES: Record<string, string> = {
   es: 'Spanish', ur: 'Urdu', hi: 'Hindi', zh: 'Chinese',
   ja: 'Japanese', ko: 'Korean', tr: 'Turkish', ru: 'Russian',
   pt: 'Portuguese', it: 'Italian', bn: 'Bengali',
+}
+
+const AVATAR_COLORS = [
+  { bg: 'var(--gold-dim)', color: 'var(--gold)' },
+  { bg: 'var(--purple-dim)', color: 'var(--purple)' },
+  { bg: 'var(--pink-dim)', color: 'var(--pink)' },
+  { bg: 'var(--olive-dim)', color: 'var(--olive)' },
+  { bg: 'var(--blue-dim)', color: 'var(--blue)' },
+]
+
+function getAvatarColor(name: string) {
+  const i = name.charCodeAt(0) % AVATAR_COLORS.length
+  return AVATAR_COLORS[i]
+}
+
+function Avatar({ name, isGroup = false, size = 42 }: { name: string; isGroup?: boolean; size?: number }) {
+  const { bg, color } = getAvatarColor(name)
+  return (
+    <div style={{
+      width: size, height: size, borderRadius: '50%',
+      background: bg, color, display: 'flex', alignItems: 'center',
+      justifyContent: 'center', fontWeight: 500, fontSize: size * 0.35,
+      flexShrink: 0,
+    }}>
+      {isGroup ? <Users size={size * 0.4} /> : name[0].toUpperCase()}
+    </div>
+  )
 }
 
 export default function ChatPage() {
@@ -60,124 +87,163 @@ export default function ChatPage() {
   )
 
   if (loading) return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="text-indigo-600 text-xl animate-pulse">Loading...</div>
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-primary)' }}>
+      <div style={{ color: 'var(--gold)', fontSize: 18 }}>Loading...</div>
     </div>
   )
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col max-w-lg mx-auto">
+    <div style={{ minHeight: '100vh', background: 'var(--bg-primary)', display: 'flex', flexDirection: 'column', maxWidth: 480, margin: '0 auto' }}>
+
       {/* Header */}
-      <div className="bg-indigo-600 text-white px-4 py-4 flex items-center justify-between">
+      <div style={{ background: 'var(--bg-tertiary)', padding: '14px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '0.5px solid var(--border)' }}>
         <div>
-          <h1 className="text-xl font-bold">LinguaDuo</h1>
-          <p className="text-indigo-200 text-xs flex items-center gap-1">
-            <Globe size={12} />
-            {LANG_NAMES[user?.preferred_language || 'en']}
+          <h1 style={{ fontSize: 20, fontWeight: 600, color: 'var(--gold)' }}>LinguaDuo</h1>
+          <p style={{ fontSize: 11, color: 'var(--purple)', marginTop: 2, display: 'flex', alignItems: 'center', gap: 4 }}>
+            <Globe size={11} /> {LANG_NAMES[user?.preferred_language || 'en']}
           </p>
         </div>
-        <div className="flex items-center gap-3">
-          <span className="text-sm text-indigo-200">{user?.username}</span>
-          <button onClick={handleLogout} className="text-indigo-200 hover:text-white">
-            <LogOut size={20} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{user?.username}</span>
+          <button onClick={handleLogout} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}>
+            <LogOut size={18} />
           </button>
         </div>
       </div>
 
+      {/* Search */}
+      <div style={{ padding: '10px 14px', background: 'var(--bg-secondary)', borderBottom: '0.5px solid var(--border)' }}>
+        <div style={{ background: 'var(--bg-tertiary)', borderRadius: 20, padding: '7px 14px', display: 'flex', alignItems: 'center', gap: 8, border: '0.5px solid var(--border)' }}>
+          <Search size={14} color="var(--text-dim)" />
+          <input
+            value={search} onChange={e => setSearch(e.target.value)}
+            placeholder="Search..."
+            style={{ background: 'none', border: 'none', outline: 'none', color: 'var(--text-primary)', fontSize: 13, width: '100%' }}
+          />
+        </div>
+      </div>
+
       {/* Tabs */}
-      <div className="flex bg-white border-b">
-        {(['chats', 'users', 'groups'] as const).map((t) => (
-          <button key={t} onClick={() => setTab(t)}
-            className={`flex-1 py-3 text-sm font-medium capitalize transition ${tab === t ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-gray-500'}`}>
+      <div style={{ display: 'flex', background: 'var(--bg-secondary)', borderBottom: '0.5px solid var(--border)' }}>
+        {(['chats', 'users', 'groups'] as const).map(t => (
+          <button key={t} onClick={() => setTab(t)} style={{
+            flex: 1, padding: '10px 0', fontSize: 12, fontWeight: 500,
+            background: 'none', border: 'none', cursor: 'pointer', textTransform: 'capitalize',
+            color: tab === t ? 'var(--gold)' : 'var(--text-muted)',
+            borderBottom: tab === t ? '2px solid var(--gold)' : '2px solid transparent',
+            transition: 'all 0.2s',
+          }}>
             {t}
           </button>
         ))}
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto">
+      <div style={{ flex: 1, overflowY: 'auto' }}>
+
+        {/* Chats Tab */}
         {tab === 'chats' && (
-          <div>
-            {allChats.length === 0 ? (
-              <div className="text-center py-20 text-gray-400">
-                <MessageCircle size={48} className="mx-auto mb-3 opacity-30" />
-                <p>No conversations yet</p>
-                <p className="text-sm mt-1">Go to Users tab to start chatting!</p>
+          allChats.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--text-dim)' }}>
+              <MessageCircle size={44} style={{ margin: '0 auto 12px', opacity: 0.3 }} />
+              <p>No conversations yet</p>
+              <p style={{ fontSize: 12, marginTop: 6 }}>Go to Users tab to start chatting!</p>
+            </div>
+          ) : allChats.map(c => {
+            const name = c.type === 'dm' ? c.user?.username || '' : c.group?.name || ''
+            return (
+              <Link key={c.room_name} href={`/chat/${c.room_name}`} style={{ textDecoration: 'none' }}>
+                <div style={{
+                  display: 'flex', alignItems: 'center', gap: 12,
+                  padding: '12px 16px', borderBottom: '0.5px solid var(--border)',
+                  background: 'var(--bg-secondary)', cursor: 'pointer',
+                  transition: 'background 0.15s',
+                }}
+                  onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-hover)')}
+                  onMouseLeave={e => (e.currentTarget.style.background = 'var(--bg-secondary)')}
+                >
+                  <Avatar name={name} isGroup={c.type === 'group'} />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-primary)' }}>{name}</span>
+                      {c.last_message_at && (
+                        <span style={{ fontSize: 10, color: 'var(--text-dim)' }}>
+                          {new Date(c.last_message_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </span>
+                      )}
+                    </div>
+                    <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {c.last_message || 'No messages yet'}
+                    </p>
+                  </div>
+                </div>
+              </Link>
+            )
+          })
+        )}
+
+        {/* Users Tab */}
+        {tab === 'users' && filteredUsers.map(u => (
+          <Link key={u.id} href={`/chat/dm_${u.id}`} style={{ textDecoration: 'none' }}>
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: 12,
+              padding: '12px 16px', borderBottom: '0.5px solid var(--border)',
+              background: 'var(--bg-secondary)', cursor: 'pointer',
+            }}
+              onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-hover)')}
+              onMouseLeave={e => (e.currentTarget.style.background = 'var(--bg-secondary)')}
+            >
+              <div style={{ position: 'relative' }}>
+                <Avatar name={u.username} size={42} />
+                {u.is_online && (
+                  <div style={{ position: 'absolute', bottom: 1, right: 1, width: 10, height: 10, borderRadius: '50%', background: 'var(--olive)', border: '2px solid var(--bg-secondary)' }} />
+                )}
               </div>
-            ) : allChats.map((c) => (
-              <Link key={c.room_name} href={`/chat/${c.room_name}`}
-                className="flex items-center gap-3 px-4 py-3 bg-white border-b hover:bg-gray-50 transition">
-                <div className="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-lg flex-shrink-0">
-                  {c.type === 'dm' ? c.user?.username[0].toUpperCase() : c.group?.name[0].toUpperCase()}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex justify-between items-center">
-                    <span className="font-medium text-gray-900">
-                      {c.type === 'dm' ? c.user?.username : c.group?.name}
-                    </span>
-                    {c.last_message_at && (
-                      <span className="text-xs text-gray-400">
-                        {new Date(c.last_message_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-sm text-gray-500 truncate">{c.last_message || 'No messages yet'}</p>
-                </div>
-              </Link>
-            ))}
-          </div>
-        )}
-
-        {tab === 'users' && (
-          <div>
-            <div className="p-3 bg-white border-b">
-              <input value={search} onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search users..."
-                className="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+              <div>
+                <p style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-primary)' }}>{u.username}</p>
+                <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2, display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <Globe size={10} /> {LANG_NAMES[u.preferred_language] || u.preferred_language}
+                </p>
+              </div>
             </div>
-            {filteredUsers.map((u) => (
-              <Link key={u.id} href={`/chat/dm_${u.id}`}
-                className="flex items-center gap-3 px-4 py-3 bg-white border-b hover:bg-gray-50 transition">
-                <div className="relative">
-                  <div className="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-lg">
-                    {u.username[0].toUpperCase()}
-                  </div>
-                  {u.is_online && (
-                    <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white" />
-                  )}
-                </div>
-                <div>
-                  <p className="font-medium text-gray-900">{u.username}</p>
-                  <p className="text-xs text-gray-400 flex items-center gap-1">
-                    <Globe size={10} /> {LANG_NAMES[u.preferred_language] || u.preferred_language}
-                  </p>
-                </div>
-              </Link>
-            ))}
-          </div>
-        )}
+          </Link>
+        ))}
 
+        {/* Groups Tab */}
         {tab === 'groups' && (
-          <div>
-            <div className="p-3 bg-white border-b">
-              <Link href="/chat/create-group"
-                className="block w-full bg-indigo-600 text-white text-center py-2 rounded-xl text-sm font-medium hover:bg-indigo-700 transition">
-                + Create Study Group
+          <>
+            <div style={{ padding: '10px 14px', background: 'var(--bg-secondary)', borderBottom: '0.5px solid var(--border)' }}>
+              <Link href="/chat/create-group" style={{ textDecoration: 'none' }}>
+                <div style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                  background: 'var(--gold)', color: '#1a1a2e', borderRadius: 20,
+                  padding: '9px 0', fontSize: 13, fontWeight: 600, cursor: 'pointer',
+                }}>
+                  <Plus size={15} /> Create Group
+                </div>
               </Link>
             </div>
-            {convos.groups.map((g) => (
-              <Link key={g.room_name} href={`/chat/${g.room_name}`}
-                className="flex items-center gap-3 px-4 py-3 bg-white border-b hover:bg-gray-50 transition">
-                <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 font-bold text-lg">
-                  <Users size={20} />
-                </div>
-                <div>
-                  <p className="font-medium text-gray-900">{g.group?.name}</p>
-                  <p className="text-xs text-gray-400">{g.group?.is_study_group ? '📚 Study Group' : '💬 Group'}</p>
+            {convos.groups.map(g => (
+              <Link key={g.room_name} href={`/chat/${g.room_name}`} style={{ textDecoration: 'none' }}>
+                <div style={{
+                  display: 'flex', alignItems: 'center', gap: 12,
+                  padding: '12px 16px', borderBottom: '0.5px solid var(--border)',
+                  background: 'var(--bg-secondary)', cursor: 'pointer',
+                }}
+                  onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-hover)')}
+                  onMouseLeave={e => (e.currentTarget.style.background = 'var(--bg-secondary)')}
+                >
+                  <Avatar name={g.group?.name || 'G'} isGroup size={42} />
+                  <div>
+                    <p style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-primary)' }}>{g.group?.name}</p>
+                    <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>
+                      {g.group?.is_study_group ? '📚 Study Group' : '💬 Group'} · {g.role === 'admin' ? '👑 Admin' : 'Member'}
+                    </p>
+                  </div>
                 </div>
               </Link>
             ))}
-          </div>
+          </>
         )}
       </div>
     </div>

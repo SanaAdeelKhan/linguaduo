@@ -5,6 +5,7 @@ import api from '@/lib/api'
 import { useAuthStore } from '@/store/authStore'
 import toast from 'react-hot-toast'
 import Link from 'next/link'
+import { Globe, Lock, Mail } from 'lucide-react'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -27,41 +28,121 @@ export default function LoginPage() {
     }
   }
 
+  const inputStyle = {
+    width: '100%',
+    background: '#16213e',
+    border: '0.5px solid #2a2a4a',
+    borderRadius: 12,
+    padding: '12px 14px 12px 40px',
+    fontSize: 14,
+    color: '#e2e2e2',
+    outline: 'none',
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-indigo-600">LinguaDuo</h1>
-          <p className="text-gray-500 mt-2">Speak in your language. Understand in theirs.</p>
+    <div style={{
+      minHeight: '100vh',
+      background: '#0d1117',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: 20,
+    }}>
+
+      {/* Logo */}
+      <div style={{ textAlign: 'center', marginBottom: 36 }}>
+        <div style={{
+          width: 64, height: 64, borderRadius: '50%',
+          background: '#d4af3718', border: '1.5px solid #d4af3744',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          margin: '0 auto 16px',
+        }}>
+          <Globe size={28} color="#d4af37" />
         </div>
-        <div className="bg-white rounded-2xl shadow-lg p-8">
-          <h2 className="text-2xl font-semibold mb-6">Welcome back</h2>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-              <input type="email" value={form.email}
-                onChange={(e) => setForm({ ...form, email: e.target.value })}
-                className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                placeholder="you@example.com" required />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
-              <input type="password" value={form.password}
-                onChange={(e) => setForm({ ...form, password: e.target.value })}
-                className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                placeholder="••••••••" required />
-            </div>
-            <button type="submit" disabled={loading}
-              className="w-full bg-indigo-600 text-white py-3 rounded-xl font-semibold hover:bg-indigo-700 transition disabled:opacity-50">
-              {loading ? 'Signing in...' : 'Sign in'}
-            </button>
-          </form>
-          <p className="text-center text-sm text-gray-500 mt-6">
-            Don't have an account?{' '}
-            <Link href="/register" className="text-indigo-600 font-medium hover:underline">Sign up</Link>
-          </p>
-        </div>
+        <h1 style={{ fontSize: 32, fontWeight: 700, color: '#d4af37', letterSpacing: 0.5 }}>LinguaDuo</h1>
+        <p style={{ fontSize: 13, color: '#9b8fd4', marginTop: 6 }}>Speak in your language. Understand in theirs.</p>
       </div>
+
+      {/* Card */}
+      <div style={{
+        width: '100%', maxWidth: 400,
+        background: '#1a1a2e',
+        border: '0.5px solid #2a2a4a',
+        borderRadius: 20,
+        padding: '32px 28px',
+      }}>
+        <h2 style={{ fontSize: 18, fontWeight: 600, color: '#e2e2e2', marginBottom: 6 }}>Welcome back</h2>
+        <p style={{ fontSize: 12, color: '#555', marginBottom: 24 }}>Sign in to continue chatting</p>
+
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+
+          {/* Email */}
+          <div style={{ position: 'relative' }}>
+            <Mail size={15} color="#555" style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)' }} />
+            <input
+              type="email"
+              value={form.email}
+              onChange={e => setForm({ ...form, email: e.target.value })}
+              placeholder="you@example.com"
+              required
+              style={inputStyle}
+              onFocus={e => e.target.style.border = '0.5px solid #d4af37'}
+              onBlur={e => e.target.style.border = '0.5px solid #2a2a4a'}
+            />
+          </div>
+
+          {/* Password */}
+          <div style={{ position: 'relative' }}>
+            <Lock size={15} color="#555" style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)' }} />
+            <input
+              type="password"
+              value={form.password}
+              onChange={e => setForm({ ...form, password: e.target.value })}
+              placeholder="••••••••"
+              required
+              style={inputStyle}
+              onFocus={e => e.target.style.border = '0.5px solid #d4af37'}
+              onBlur={e => e.target.style.border = '0.5px solid #2a2a4a'}
+            />
+          </div>
+
+          {/* Button */}
+          <button
+            type="submit"
+            disabled={loading}
+            style={{
+              background: loading ? '#2a2a4a' : '#d4af37',
+              color: loading ? '#555' : '#1a1a2e',
+              border: 'none', borderRadius: 12,
+              padding: '13px 0', fontSize: 14, fontWeight: 600,
+              cursor: loading ? 'not-allowed' : 'pointer',
+              transition: 'all 0.2s', marginTop: 4,
+            }}
+          >
+            {loading ? 'Signing in...' : 'Sign in'}
+          </button>
+        </form>
+
+        {/* Divider */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '20px 0' }}>
+          <div style={{ flex: 1, height: '0.5px', background: '#2a2a4a' }} />
+          <span style={{ fontSize: 11, color: '#444' }}>or</span>
+          <div style={{ flex: 1, height: '0.5px', background: '#2a2a4a' }} />
+        </div>
+
+        <p style={{ textAlign: 'center', fontSize: 13, color: '#555' }}>
+          Don't have an account?{' '}
+          <Link href="/register" style={{ color: '#9b8fd4', fontWeight: 500, textDecoration: 'none' }}>
+            Sign up
+          </Link>
+        </p>
+      </div>
+
+      {/* Footer */}
+      <p style={{ marginTop: 24, fontSize: 11, color: '#333' }}>
+        🌐 Supports 15+ languages with real-time translation
+      </p>
     </div>
   )
 }

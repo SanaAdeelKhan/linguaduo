@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { useAuthStore } from '@/store/authStore'
-import { ArrowLeft, Send, Globe, Users } from 'lucide-react'
+import { ArrowLeft, Send, Globe, Users, X, Plus, Trash2 } from 'lucide-react'
 import Link from 'next/link'
 import api from '@/lib/api'
 
@@ -24,6 +24,31 @@ interface Member {
   role: string
 }
 
+const AVATAR_COLORS = [
+  { bg: '#d4af3722', color: '#d4af37' },
+  { bg: '#7c3aed22', color: '#9b8fd4' },
+  { bg: '#c0587822', color: '#e87da0' },
+  { bg: '#6b7c1322', color: '#a3b435' },
+  { bg: '#1e40af22', color: '#60a5fa' },
+]
+
+function getAvatarColor(name: string) {
+  return AVATAR_COLORS[name.charCodeAt(0) % AVATAR_COLORS.length]
+}
+
+function Avatar({ name, size = 36 }: { name: string; size?: number }) {
+  const { bg, color } = getAvatarColor(name)
+  return (
+    <div style={{
+      width: size, height: size, borderRadius: '50%', background: bg, color,
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      fontWeight: 500, fontSize: size * 0.36, flexShrink: 0,
+    }}>
+      {name[0].toUpperCase()}
+    </div>
+  )
+}
+
 export default function ChatRoom() {
   const { room } = useParams()
   const router = useRouter()
@@ -40,44 +65,34 @@ export default function ChatRoom() {
   const wsRef = useRef<WebSocket | null>(null)
   const bottomRef = useRef<HTMLDivElement>(null)
   const roomName = Array.isArray(room) ? room[0] : room
+  const isGroup = roomName?.startsWith('group_')
 
   useEffect(() => {
     if (!user || !access) { router.push('/login'); return }
 
     if (roomName?.startsWith('dm_')) {
-      const parts = roomName.split('_')
-      const otherId = parts.find(p => p !== String(user.id) && p !== 'dm')
+      const otherId = roomName.split('_')[1]
       fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/users/${otherId}/`, {
         headers: { Authorization: `Bearer ${access}` }
       })
         .then(r => r.json())
-        .then(data => setRoomTitle(`@${data.username}`))
-        .catch(() => setRoomTitle(`@user ${otherId}`))
+        .then(data => setRoomTitle(data.username))
+        .catch(() => setRoomTitle(`User ${otherId}`))
     } else if (roomName?.startsWith('group_')) {
       const groupId = roomName.replace('group_', '')
-      // Fetch group members to get group name + member list
-      api.get(`/api/chat/groups/${groupId}/members/`)
-        .then(res => {
-          setMembers(res.data)
-          const me = res.data.find((m: Member) => m.id === user.id)
-          if (me?.role === 'admin') setIsAdmin(true)
-        })
-        .catch(() => {})
-      // Fetch group name from conversations
-      api.get('/api/chat/conversations/')
-        .then(res => {
-          const group = res.data.groups.find((g: any) => g.room_name === roomName)
-          if (group?.group?.name) setRoomTitle(group.group.name)
-          else setRoomTitle(`Group ${groupId}`)
-        })
-        .catch(() => setRoomTitle(`Group ${groupId}`))
-    } else {
-      setRoomTitle(roomName || '')
+      api.get(`/api/chat/groups/${groupId}/members/`).then(res => {
+        setMembers(res.data)
+        const me = res.data.find((m: Member) => m.id === user.id)
+        if (me?.role === 'admin') setIsAdmin(true)
+      }).catch(() => {})
+      api.get('/api/chat/conversations/').then(res => {
+        const g = res.data.groups.find((g: any) => g.room_name === roomName)
+        setRoomTitle(g?.group?.name || `Group ${groupId}`)
+      }).catch(() => setRoomTitle(`Group ${groupId}`))
     }
 
     const ws = new WebSocket(`${process.env.NEXT_PUBLIC_WS_URL}/ws/chat/${roomName}/?token=${access}`)
     wsRef.current = ws
-
     ws.onopen = () => setConnected(true)
     ws.onclose = () => setConnected(false)
     ws.onmessage = (e) => {
@@ -85,27 +100,21 @@ export default function ChatRoom() {
       if (data.type === 'history') {
         setMessages(data.messages)
       } else if (data.type === 'message') {
-        setMessages((prev) => {
-          if (prev.find((m) => m.id === data.message_id)) return prev
+        setMessages(prev => {
+          if (prev.find(m => m.id === data.message_id)) return prev
           return [...prev, {
-            id: data.message_id,
-            message: data.message,
+            id: data.message_id, message: data.message,
             original_message: data.original_message,
-            sender_id: data.sender_id,
-            sender_username: data.sender_username,
-            message_type: data.message_type,
-            created_at: data.created_at,
+            sender_id: data.sender_id, sender_username: data.sender_username,
+            message_type: data.message_type, created_at: data.created_at,
           }]
         })
       }
     }
-
     return () => ws.close()
   }, [roomName, access])
 
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages])
+  useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [messages])
 
   const loadAllUsers = async () => {
     const res = await api.get('/api/chat/users/')
@@ -140,87 +149,88 @@ export default function ChatRoom() {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage() }
   }
 
-  const isMe = (senderId: number) => senderId === user?.id
-  const isGroup = roomName?.startsWith('group_')
+  const isMe = (id: number) => id === user?.id
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col max-w-lg mx-auto">
+    <div style={{ minHeight: '100vh', background: 'var(--bg-primary)', display: 'flex', flexDirection: 'column', maxWidth: 480, margin: '0 auto' }}>
+
       {/* Header */}
-      <div className="bg-indigo-600 text-white px-4 py-3 flex items-center gap-3">
-        <Link href="/chat" className="text-indigo-200 hover:text-white">
-          <ArrowLeft size={22} />
+      <div style={{ background: 'var(--bg-tertiary)', padding: '10px 14px', display: 'flex', alignItems: 'center', gap: 10, borderBottom: '0.5px solid var(--border)', position: 'sticky', top: 0, zIndex: 10 }}>
+        <Link href="/chat" style={{ color: 'var(--text-muted)', display: 'flex' }}>
+          <ArrowLeft size={20} />
         </Link>
-        <div className="flex-1">
-          <h2 className="font-semibold">{roomTitle || roomName}</h2>
-          <p className="text-xs text-indigo-200 flex items-center gap-1">
-            <span className={`w-2 h-2 rounded-full ${connected ? 'bg-green-400' : 'bg-red-400'}`} />
+        {isGroup
+          ? <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--purple-dim)', color: 'var(--purple)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><Users size={16} /></div>
+          : <Avatar name={roomTitle || '?'} size={36} />
+        }
+        <div style={{ flex: 1 }}>
+          <p style={{ fontSize: 14, fontWeight: 500, color: 'var(--text-primary)' }}>{roomTitle || roomName}</p>
+          <p style={{ fontSize: 10, color: connected ? 'var(--olive)' : '#e87da0', display: 'flex', alignItems: 'center', gap: 4 }}>
+            <span style={{ width: 6, height: 6, borderRadius: '50%', background: connected ? 'var(--olive)' : '#e87da0', display: 'inline-block' }} />
             {connected ? 'Connected' : 'Connecting...'}
-            {isGroup && members.length > 0 && (
-              <span className="ml-2">{members.length} members</span>
-            )}
+            {isGroup && members.length > 0 && <span style={{ color: 'var(--text-dim)', marginLeft: 6 }}>{members.length} members</span>}
           </p>
         </div>
-        {isGroup && (
+        {isGroup ? (
           <button onClick={() => { setShowMembers(!showMembers); if (!showMembers) loadAllUsers() }}
-            className="text-indigo-200 hover:text-white">
-            <Users size={20} />
+            style={{ background: 'none', border: 'none', cursor: 'pointer', color: showMembers ? 'var(--gold)' : 'var(--text-muted)' }}>
+            <Users size={18} />
           </button>
-        )}
-        {!isGroup && <Globe size={18} className="text-indigo-200" />}
+        ) : <Globe size={16} color="var(--text-muted)" />}
       </div>
 
       {/* Members Panel */}
       {showMembers && isGroup && (
-        <div className="bg-white border-b shadow-sm">
-          <div className="px-4 py-2 border-b flex items-center justify-between">
-            <span className="text-sm font-semibold text-gray-700">Members</span>
-            {isAdmin && (
-              <button onClick={() => setAddingUser(!addingUser)}
-                className="text-xs text-indigo-600 font-medium hover:underline">
-                {addingUser ? 'Cancel' : '+ Add Member'}
+        <div style={{ background: 'var(--bg-secondary)', borderBottom: '0.5px solid var(--border)' }}>
+          <div style={{ padding: '8px 14px', borderBottom: '0.5px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--gold)' }}>Members</span>
+            <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+              {isAdmin && (
+                <button onClick={() => setAddingUser(!addingUser)}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: addingUser ? 'var(--pink)' : 'var(--purple)', display: 'flex', alignItems: 'center', gap: 4, fontSize: 12 }}>
+                  {addingUser ? <X size={14} /> : <Plus size={14} />}
+                  {addingUser ? 'Cancel' : 'Add'}
+                </button>
+              )}
+              <button onClick={() => setShowMembers(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}>
+                <X size={16} />
               </button>
-            )}
+            </div>
           </div>
 
-          {/* Add member dropdown */}
           {addingUser && isAdmin && (
-            <div className="px-4 py-2 border-b bg-indigo-50">
-              <p className="text-xs text-gray-500 mb-2">Select user to add:</p>
+            <div style={{ maxHeight: 120, overflowY: 'auto', borderBottom: '0.5px solid var(--border)', background: 'var(--bg-tertiary)' }}>
               {allUsers.length === 0
-                ? <p className="text-xs text-gray-400">All users are already members</p>
+                ? <p style={{ padding: '10px 14px', fontSize: 12, color: 'var(--text-dim)' }}>All users are already members</p>
                 : allUsers.map(u => (
                   <button key={u.id} onClick={() => handleAddMember(u.id)}
-                    className="flex items-center gap-2 w-full text-left px-2 py-1 hover:bg-indigo-100 rounded text-sm">
-                    <span className="w-6 h-6 rounded-full bg-indigo-200 flex items-center justify-center text-xs font-bold text-indigo-700">
-                      {u.username[0].toUpperCase()}
-                    </span>
-                    {u.username}
+                    style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', padding: '8px 14px', background: 'none', border: 'none', cursor: 'pointer', borderBottom: '0.5px solid var(--border)' }}>
+                    <Avatar name={u.username} size={28} />
+                    <span style={{ fontSize: 12, color: 'var(--text-primary)' }}>{u.username}</span>
+                    <Plus size={12} style={{ marginLeft: 'auto', color: 'var(--olive)' }} />
                   </button>
                 ))
               }
             </div>
           )}
 
-          {/* Member list */}
-          <div className="max-h-40 overflow-y-auto">
+          <div style={{ maxHeight: 160, overflowY: 'auto' }}>
             {members.map(m => (
-              <div key={m.id} className="flex items-center gap-3 px-4 py-2 hover:bg-gray-50">
-                <div className="relative">
-                  <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-sm">
-                    {m.username[0].toUpperCase()}
-                  </div>
-                  {m.is_online && (
-                    <div className="absolute bottom-0 right-0 w-2 h-2 bg-green-500 rounded-full border border-white" />
-                  )}
+              <div key={m.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 14px', borderBottom: '0.5px solid var(--border)' }}>
+                <div style={{ position: 'relative' }}>
+                  <Avatar name={m.username} size={30} />
+                  {m.is_online && <div style={{ position: 'absolute', bottom: 0, right: 0, width: 8, height: 8, borderRadius: '50%', background: 'var(--olive)', border: '2px solid var(--bg-secondary)' }} />}
                 </div>
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-gray-800">{m.username}</p>
-                  <p className="text-xs text-gray-400">{m.role === 'admin' ? '👑 Admin' : 'Member'}</p>
+                <div style={{ flex: 1 }}>
+                  <p style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-primary)' }}>{m.username}</p>
+                  <p style={{ fontSize: 10, color: m.role === 'admin' ? 'var(--gold)' : 'var(--text-dim)' }}>
+                    {m.role === 'admin' ? '👑 Admin' : 'Member'}
+                  </p>
                 </div>
                 {isAdmin && m.id !== user?.id && (
                   <button onClick={() => handleRemoveMember(m.id)}
-                    className="text-xs text-red-400 hover:text-red-600">
-                    Remove
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--pink)', padding: 4 }}>
+                    <Trash2 size={13} />
                   </button>
                 )}
               </div>
@@ -230,30 +240,34 @@ export default function ChatRoom() {
       )}
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-2">
+      <div style={{ flex: 1, overflowY: 'auto', padding: '14px', display: 'flex', flexDirection: 'column', gap: 6 }}>
         {messages.length === 0 && (
-          <div className="text-center py-20 text-gray-400">
+          <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--text-dim)' }}>
             <p>No messages yet</p>
-            <p className="text-sm mt-1">Say hello! 👋</p>
+            <p style={{ fontSize: 12, marginTop: 6 }}>Say hello! 👋</p>
           </div>
         )}
-        {messages.map((msg) => (
-          <div key={`${msg.id}-${msg.created_at}`} className={`flex ${isMe(msg.sender_id) ? 'justify-end' : 'justify-start'}`}>
-            <div className={`max-w-xs lg:max-w-md flex flex-col ${isMe(msg.sender_id) ? 'items-end' : 'items-start'}`}>
+        {messages.map(msg => (
+          <div key={`${msg.id}-${msg.created_at}`} style={{ display: 'flex', justifyContent: isMe(msg.sender_id) ? 'flex-end' : 'flex-start' }}>
+            <div style={{ maxWidth: '72%', display: 'flex', flexDirection: 'column', alignItems: isMe(msg.sender_id) ? 'flex-end' : 'flex-start' }}>
               {!isMe(msg.sender_id) && (
-                <span className="text-xs text-gray-500 mb-1 ml-1">{msg.sender_username}</span>
+                <span style={{ fontSize: 10, color: 'var(--purple)', marginBottom: 3, marginLeft: 4 }}>{msg.sender_username}</span>
               )}
-              <div className={`px-4 py-2 rounded-2xl ${isMe(msg.sender_id)
-                ? 'bg-indigo-600 text-white rounded-tr-sm'
-                : 'bg-white text-gray-900 shadow-sm rounded-tl-sm'}`}>
-                <p className="text-sm">{msg.message}</p>
+              <div style={{
+                padding: '8px 12px', borderRadius: 14,
+                borderBottomRightRadius: isMe(msg.sender_id) ? 3 : 14,
+                borderBottomLeftRadius: isMe(msg.sender_id) ? 14 : 3,
+                background: isMe(msg.sender_id) ? 'var(--bubble-mine)' : 'var(--bubble-theirs)',
+                border: isMe(msg.sender_id) ? 'none' : '0.5px solid var(--border)',
+              }}>
+                <p style={{ fontSize: 13, color: 'var(--text-primary)', lineHeight: 1.5 }}>{msg.message}</p>
                 {msg.original_message && msg.original_message !== msg.message && (
-                  <p className={`text-xs mt-1 ${isMe(msg.sender_id) ? 'text-indigo-200' : 'text-gray-400'}`}>
-                    🌐 {msg.original_message}
+                  <p style={{ fontSize: 10, marginTop: 4, color: 'var(--olive)', display: 'flex', alignItems: 'center', gap: 3 }}>
+                    <Globe size={9} /> {msg.original_message}
                   </p>
                 )}
               </div>
-              <span className="text-xs text-gray-400 mt-1 mx-1">
+              <span style={{ fontSize: 10, color: 'var(--text-dim)', marginTop: 3, marginLeft: 4, marginRight: 4 }}>
                 {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
               </span>
             </div>
@@ -263,13 +277,23 @@ export default function ChatRoom() {
       </div>
 
       {/* Input */}
-      <div className="bg-white border-t px-4 py-3 flex items-center gap-3">
-        <input value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={handleKey}
+      <div style={{ background: 'var(--bg-tertiary)', padding: '10px 14px', display: 'flex', alignItems: 'center', gap: 10, borderTop: '0.5px solid var(--border)' }}>
+        <input
+          value={input} onChange={e => setInput(e.target.value)} onKeyDown={handleKey}
           placeholder="Type a message..."
-          className="flex-1 border border-gray-200 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+          style={{
+            flex: 1, background: 'var(--bg-secondary)', border: '0.5px solid var(--border)',
+            borderRadius: 22, padding: '9px 16px', fontSize: 13,
+            color: 'var(--text-primary)', outline: 'none',
+          }}
+        />
         <button onClick={sendMessage} disabled={!input.trim() || !connected}
-          className="w-10 h-10 bg-indigo-600 text-white rounded-full flex items-center justify-center hover:bg-indigo-700 transition disabled:opacity-40">
-          <Send size={16} />
+          style={{
+            width: 38, height: 38, borderRadius: '50%', background: input.trim() && connected ? 'var(--gold)' : 'var(--bg-secondary)',
+            border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            transition: 'background 0.2s', flexShrink: 0,
+          }}>
+          <Send size={15} color={input.trim() && connected ? '#1a1a2e' : 'var(--text-dim)'} />
         </button>
       </div>
     </div>
