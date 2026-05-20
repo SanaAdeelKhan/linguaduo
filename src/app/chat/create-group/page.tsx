@@ -59,7 +59,7 @@ export default function CreateGroupPage() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg-primary)', display: 'flex', flexDirection: 'column', maxWidth: 480, margin: '0 auto' }}>
+    <div style={{ minHeight: '100vh', background: 'var(--bg-primary)', display: 'flex', flexDirection: 'column', maxWidth: "100%" }}>
       <div style={{ background: 'var(--bg-tertiary)', padding: '12px 14px', display: 'flex', alignItems: 'center', gap: 12, borderBottom: '0.5px solid var(--border)' }}>
         <Link href="/chat" style={{ color: 'var(--text-muted)', display: 'flex' }}><ArrowLeft size={20} /></Link>
         <h2 style={{ fontSize: 15, fontWeight: 500, color: 'var(--gold)' }}>Create Group</h2>
