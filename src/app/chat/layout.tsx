@@ -247,8 +247,8 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
     <>
       <style>{`
         @media (min-width: 768px) {
-          .sidebar-panel { display: flex !important; width: 320px !important; flex-shrink: 0; }
-          .main-panel { display: flex !important; }
+          .sidebar-panel { display: flex !important; width: 300px !important; min-width: 300px !important; flex-shrink: 0; }
+          .main-panel { display: flex !important; flex: 1 !important; min-width: 0 !important; overflow: hidden; }
         }
         @media (max-width: 767px) {
           .sidebar-panel { display: ${isRoomOpen ? 'none' : 'flex'} !important; width: 100% !important; }

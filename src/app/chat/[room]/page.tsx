@@ -32,6 +32,15 @@ const AVATAR_COLORS = [
   { bg: '#1e40af22', color: '#60a5fa' },
 ]
 
+const SENDER_COLORS = [
+  '#d4af37', '#9b8fd4', '#e87da0', '#a3b435', '#60a5fa',
+  '#f97316', '#34d399', '#f43f5e', '#818cf8', '#fb923c',
+]
+
+function getSenderColor(name: string) {
+  return SENDER_COLORS[name.charCodeAt(0) % SENDER_COLORS.length]
+}
+
 function getAvatarColor(name: string) {
   return AVATAR_COLORS[name.charCodeAt(0) % AVATAR_COLORS.length]
 }
@@ -251,7 +260,7 @@ export default function ChatRoom() {
           <div key={`${msg.id}-${msg.created_at}`} style={{ display: 'flex', justifyContent: isMe(msg.sender_id) ? 'flex-end' : 'flex-start' }}>
             <div style={{ maxWidth: '72%', display: 'flex', flexDirection: 'column', alignItems: isMe(msg.sender_id) ? 'flex-end' : 'flex-start' }}>
               {!isMe(msg.sender_id) && (
-                <span style={{ fontSize: 10, color: 'var(--purple)', marginBottom: 3, marginLeft: 4 }}>{msg.sender_username}</span>
+                <span style={{ fontSize: 10, color: getSenderColor(msg.sender_username), marginBottom: 3, marginLeft: 4, fontWeight: 600 }}>{msg.sender_username}</span>
               )}
               <div style={{
                 padding: '8px 12px', borderRadius: 14,
