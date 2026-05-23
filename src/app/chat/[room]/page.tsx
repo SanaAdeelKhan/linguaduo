@@ -2,9 +2,15 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { useAuthStore } from '@/store/authStore'
-import { ArrowLeft, Send, Globe, Users, X, Plus, Trash2, Copy, CornerUpLeft, Check } from 'lucide-react'
+import { ArrowLeft, Send, Globe, Users, X, Plus, Trash2, Copy, CornerUpLeft, Check, Reply } from 'lucide-react'
 import Link from 'next/link'
 import api from '@/lib/api'
+
+interface ReplyTo {
+  id: number
+  sender_username: string
+  message: string
+}
 
 interface Message {
   id: number
@@ -14,6 +20,7 @@ interface Message {
   sender_username: string
   message_type: string
   created_at: string
+  reply_to?: ReplyTo | null
 }
 
 interface Member {
@@ -64,6 +71,92 @@ interface ContextMenu {
   msg: Message
 }
 
+// Swipeable message row
+function SwipeableMessage({
+  msg, isMe, onReply, onContextMenu, children
+}: {
+  msg: Message
+  isMe: boolean
+  onReply: (msg: Message) => void
+  onContextMenu: (e: React.MouseEvent, msg: Message) => void
+  children: React.ReactNode
+}) {
+  const touchStartX = useRef<number>(0)
+  const touchStartY = useRef<number>(0)
+  const [swipeX, setSwipeX] = useState(0)
+  const [swiping, setSwiping] = useState(false)
+  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const didSwipe = useRef(false)
+  const didLongPress = useRef(false)
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX
+    touchStartY.current = e.touches[0].clientY
+    didSwipe.current = false
+    didLongPress.current = false
+    longPressTimer.current = setTimeout(() => {
+      didLongPress.current = true
+      const fakeEvent = {
+        preventDefault: () => {},
+        clientX: window.innerWidth / 2 - 70,
+        clientY: window.innerHeight / 2 - 40,
+      } as React.MouseEvent
+      onContextMenu(fakeEvent, msg)
+    }, 500)
+  }
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    if (longPressTimer.current) { clearTimeout(longPressTimer.current); longPressTimer.current = null }
+    const dx = e.touches[0].clientX - touchStartX.current
+    const dy = Math.abs(e.touches[0].clientY - touchStartY.current)
+    if (dy > 10) return // vertical scroll — ignore
+    if (dx > 5) {
+      didSwipe.current = true
+      setSwiping(true)
+      setSwipeX(Math.min(dx, 64))
+    }
+  }
+
+  const onTouchEnd = () => {
+    if (longPressTimer.current) clearTimeout(longPressTimer.current)
+    if (didSwipe.current && swipeX >= 48) {
+      onReply(msg)
+    }
+    setSwipeX(0)
+    setSwiping(false)
+    didSwipe.current = false
+  }
+
+  return (
+    <div
+      style={{ position: 'relative', overflow: 'hidden' }}
+      onContextMenu={(e) => onContextMenu(e, msg)}
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
+    >
+      {/* Swipe hint icon */}
+      {swipeX > 10 && (
+        <div style={{
+          position: 'absolute', left: 8, top: '50%', transform: 'translateY(-50%)',
+          opacity: Math.min(swipeX / 48, 1),
+          color: 'var(--gold)', transition: 'none',
+        }}>
+          <Reply size={18} />
+        </div>
+      )}
+      <div style={{
+        transform: `translateX(${swipeX}px)`,
+        transition: swiping ? 'none' : 'transform 0.2s ease',
+        display: 'flex',
+        justifyContent: isMe ? 'flex-end' : 'flex-start',
+      }}>
+        {children}
+      </div>
+    </div>
+  )
+}
+
 export default function ChatRoom() {
   const { room } = useParams()
   const router = useRouter()
@@ -83,7 +176,6 @@ export default function ChatRoom() {
 
   const wsRef = useRef<WebSocket | null>(null)
   const bottomRef = useRef<HTMLDivElement>(null)
-  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
   const roomName = Array.isArray(room) ? room[0] : room
@@ -125,10 +217,14 @@ export default function ChatRoom() {
         setMessages(prev => {
           if (prev.find(m => m.id === data.message_id)) return prev
           return [...prev, {
-            id: data.message_id, message: data.message,
+            id: data.message_id,
+            message: data.message,
             original_message: data.original_message,
-            sender_id: data.sender_id, sender_username: data.sender_username,
-            message_type: data.message_type, created_at: data.created_at,
+            sender_id: data.sender_id,
+            sender_username: data.sender_username,
+            message_type: data.message_type,
+            created_at: data.created_at,
+            reply_to: data.reply_to || null,
           }]
         })
       }
@@ -138,12 +234,25 @@ export default function ChatRoom() {
 
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [messages])
 
-  // Close context menu on outside click
   useEffect(() => {
     const handler = () => setContextMenu(null)
     document.addEventListener('click', handler)
     return () => document.removeEventListener('click', handler)
   }, [])
+
+  // On DM load, check for pending private reply quote from sessionStorage
+  useEffect(() => {
+    if (!roomName?.startsWith('dm_')) return
+    const raw = sessionStorage.getItem('replyQuote')
+    if (raw) {
+      try {
+        const q = JSON.parse(raw)
+        setInput(`"${q.text}" `)
+        sessionStorage.removeItem('replyQuote')
+        setTimeout(() => inputRef.current?.focus(), 300)
+      } catch {}
+    }
+  }, [roomName])
 
   const loadAllUsers = async () => {
     const res = await api.get('/api/chat/users/')
@@ -170,7 +279,9 @@ export default function ChatRoom() {
 
   const sendMessage = () => {
     if (!input.trim() || !wsRef.current) return
-    wsRef.current.send(JSON.stringify({ type: 'text', message: input.trim() }))
+    const payload: any = { type: 'text', message: input.trim() }
+    if (replyTo) payload.reply_to_id = replyTo.id
+    wsRef.current.send(JSON.stringify(payload))
     setInput('')
     setReplyTo(null)
   }
@@ -181,71 +292,40 @@ export default function ChatRoom() {
 
   const isMe = (id: number) => id === user?.id
 
-  // Copy message text
   const handleCopy = useCallback((msg: Message) => {
-    const text = msg.message
-    navigator.clipboard.writeText(text).then(() => {
+    navigator.clipboard.writeText(msg.message).then(() => {
       setCopiedId(msg.id)
       setTimeout(() => setCopiedId(null), 2000)
     })
     setContextMenu(null)
   }, [])
 
-  // Private reply — navigate to DM with quoted text pre-filled
+  // Inline reply (same chat)
+  const handleInlineReply = useCallback((msg: Message) => {
+    setContextMenu(null)
+    setReplyTo(msg)
+    setTimeout(() => inputRef.current?.focus(), 50)
+  }, [])
+
+  // Private reply (group → DM)
   const handlePrivateReply = useCallback((msg: Message) => {
     setContextMenu(null)
-    if (isMe(msg.sender_id)) return // can't DM yourself
-    setReplyTo(msg)
-    // If already in a DM with this person, just pre-fill; if in group, navigate to DM
+    if (isMe(msg.sender_id)) return
     const dmRoom = `dm_${msg.sender_id}`
-    if (roomName !== dmRoom) {
-      // Navigate to DM room carrying the reply text via sessionStorage
-      sessionStorage.setItem('replyQuote', JSON.stringify({
-        sender: msg.sender_username,
-        text: msg.message,
-      }))
-      router.push(`/chat/${dmRoom}`)
-    } else {
-      // Already in DM — just set reply bar
-      setReplyTo(msg)
-      inputRef.current?.focus()
-    }
+    sessionStorage.setItem('replyQuote', JSON.stringify({
+      sender: msg.sender_username,
+      text: msg.message,
+    }))
+    router.push(`/chat/${dmRoom}`)
   }, [roomName, router])
 
-  // Context menu on right-click (desktop)
   const handleContextMenu = useCallback((e: React.MouseEvent, msg: Message) => {
     e.preventDefault()
     setContextMenu({ x: e.clientX, y: e.clientY, msg })
   }, [])
 
-  // Long press (mobile)
-  const handleTouchStart = useCallback((msg: Message) => {
-    longPressTimer.current = setTimeout(() => {
-      // Show context menu at center-ish
-      setContextMenu({ x: window.innerWidth / 2 - 70, y: window.innerHeight / 2 - 40, msg })
-    }, 500)
-  }, [])
-
-  const handleTouchEnd = useCallback(() => {
-    if (longPressTimer.current) clearTimeout(longPressTimer.current)
-  }, [])
-
-  // On load, check if there's a pending reply quote (from group → DM navigation)
-  useEffect(() => {
-    if (!roomName?.startsWith('dm_')) return
-    const raw = sessionStorage.getItem('replyQuote')
-    if (raw) {
-      try {
-        const q = JSON.parse(raw)
-        setInput(`"${q.text}" `)
-        sessionStorage.removeItem('replyQuote')
-        setTimeout(() => inputRef.current?.focus(), 300)
-      } catch {}
-    }
-  }, [roomName])
-
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg-primary)', display: 'flex', flexDirection: 'column', maxWidth: "100%", position: 'relative' }}>
+    <div style={{ minHeight: '100vh', background: 'var(--bg-primary)', display: 'flex', flexDirection: 'column', maxWidth: '100%', position: 'relative' }}>
 
       {/* Header */}
       <div style={{ background: 'var(--bg-tertiary)', padding: '10px 14px', display: 'flex', alignItems: 'center', gap: 10, borderBottom: '0.5px solid var(--border)', position: 'sticky', top: 0, zIndex: 10 }}>
@@ -290,7 +370,6 @@ export default function ChatRoom() {
               </button>
             </div>
           </div>
-
           {addingUser && isAdmin && (
             <div style={{ maxHeight: 120, overflowY: 'auto', borderBottom: '0.5px solid var(--border)', background: 'var(--bg-tertiary)' }}>
               {allUsers.length === 0
@@ -306,7 +385,6 @@ export default function ChatRoom() {
               }
             </div>
           )}
-
           <div style={{ maxHeight: 160, overflowY: 'auto' }}>
             {members.map(m => (
               <div key={m.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 14px', borderBottom: '0.5px solid var(--border)' }}>
@@ -333,25 +411,27 @@ export default function ChatRoom() {
       )}
 
       {/* Messages */}
-      <div style={{ flex: 1, overflowY: 'auto', padding: '14px', display: 'flex', flexDirection: 'column', gap: 6 }}>
+      <div style={{ flex: 1, overflowY: 'auto', padding: '14px', display: 'flex', flexDirection: 'column', gap: 4 }}>
         {messages.length === 0 && (
           <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--text-dim)' }}>
             <p>No messages yet</p>
             <p style={{ fontSize: 12, marginTop: 6 }}>Say hello! 👋</p>
           </div>
         )}
+
         {messages.map(msg => (
-          <div
+          <SwipeableMessage
             key={`${msg.id}-${msg.created_at}`}
-            style={{ display: 'flex', justifyContent: isMe(msg.sender_id) ? 'flex-end' : 'flex-start' }}
-            onContextMenu={(e) => handleContextMenu(e, msg)}
-            onTouchStart={() => handleTouchStart(msg)}
-            onTouchEnd={handleTouchEnd}
-            onTouchMove={handleTouchEnd}
+            msg={msg}
+            isMe={isMe(msg.sender_id)}
+            onReply={handleInlineReply}
+            onContextMenu={handleContextMenu}
           >
             <div style={{ maxWidth: '72%', display: 'flex', flexDirection: 'column', alignItems: isMe(msg.sender_id) ? 'flex-end' : 'flex-start' }}>
               {!isMe(msg.sender_id) && (
-                <span style={{ fontSize: 10, color: getSenderColor(msg.sender_username), marginBottom: 3, marginLeft: 4, fontWeight: 600 }}>{msg.sender_username}</span>
+                <span style={{ fontSize: 10, color: getSenderColor(msg.sender_username), marginBottom: 3, marginLeft: 4, fontWeight: 600 }}>
+                  {msg.sender_username}
+                </span>
               )}
               <div style={{
                 padding: '8px 12px', borderRadius: 14,
@@ -361,17 +441,38 @@ export default function ChatRoom() {
                 border: isMe(msg.sender_id) ? '0.5px solid #2a5a8a' : '0.5px solid var(--border)',
                 position: 'relative',
               }}>
-                {/* copied flash */}
+                {/* Copied flash */}
                 {copiedId === msg.id && (
                   <div style={{
                     position: 'absolute', top: -22, left: '50%', transform: 'translateX(-50%)',
                     background: 'var(--olive)', color: '#0d1117', fontSize: 10, padding: '2px 8px',
-                    borderRadius: 10, whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: 3,
+                    borderRadius: 10, whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: 3, zIndex: 5,
                   }}>
                     <Check size={9} /> Copied!
                   </div>
                 )}
-                <p style={{ fontSize: 13, color: isMe(msg.sender_id) ? '#c8e0f8' : 'var(--text-primary)', lineHeight: 1.5 }}>{msg.message}</p>
+
+                {/* Inline reply quote */}
+                {msg.reply_to && (
+                  <div style={{
+                    borderLeft: `3px solid ${getSenderColor(msg.reply_to.sender_username)}`,
+                    background: isMe(msg.sender_id) ? '#0f2a45' : '#16162a',
+                    borderRadius: 6,
+                    padding: '5px 8px',
+                    marginBottom: 6,
+                  }}>
+                    <p style={{ fontSize: 10, fontWeight: 600, color: getSenderColor(msg.reply_to.sender_username), marginBottom: 2 }}>
+                      {msg.reply_to.sender_username}
+                    </p>
+                    <p style={{ fontSize: 11, color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 220 }}>
+                      {msg.reply_to.message}
+                    </p>
+                  </div>
+                )}
+
+                <p style={{ fontSize: 13, color: isMe(msg.sender_id) ? '#c8e0f8' : 'var(--text-primary)', lineHeight: 1.5 }}>
+                  {msg.message}
+                </p>
                 {msg.original_message && msg.original_message !== msg.message && (
                   <p style={{ fontSize: 10, marginTop: 4, color: 'var(--olive)', display: 'flex', alignItems: 'center', gap: 3 }}>
                     <Globe size={9} /> {msg.original_message}
@@ -382,20 +483,21 @@ export default function ChatRoom() {
                 {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
               </span>
             </div>
-          </div>
+          </SwipeableMessage>
         ))}
         <div ref={bottomRef} />
       </div>
 
-      {/* Reply bar (when replying privately in DM) */}
+      {/* Reply bar */}
       {replyTo && (
         <div style={{
           background: 'var(--bg-secondary)', borderTop: '0.5px solid var(--border)',
           padding: '8px 14px', display: 'flex', alignItems: 'center', gap: 8,
         }}>
+          <Reply size={14} color="var(--gold)" style={{ flexShrink: 0 }} />
           <div style={{ flex: 1, borderLeft: '3px solid var(--gold)', paddingLeft: 8 }}>
             <p style={{ fontSize: 10, color: 'var(--gold)', fontWeight: 600 }}>
-              Replying to {replyTo.sender_username}
+              {isMe(replyTo.sender_id) ? 'Replying to yourself' : `Replying to ${replyTo.sender_username}`}
             </p>
             <p style={{ fontSize: 11, color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 260 }}>
               {replyTo.message}
@@ -421,7 +523,8 @@ export default function ChatRoom() {
         />
         <button onClick={sendMessage} disabled={!input.trim() || !connected}
           style={{
-            width: 38, height: 38, borderRadius: '50%', background: input.trim() && connected ? 'var(--gold)' : 'var(--bg-secondary)',
+            width: 38, height: 38, borderRadius: '50%',
+            background: input.trim() && connected ? 'var(--gold)' : 'var(--bg-secondary)',
             border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
             transition: 'background 0.2s', flexShrink: 0,
           }}>
@@ -435,17 +538,32 @@ export default function ChatRoom() {
           onClick={e => e.stopPropagation()}
           style={{
             position: 'fixed',
-            top: Math.min(contextMenu.y, window.innerHeight - 100),
-            left: Math.min(contextMenu.x, window.innerWidth - 160),
+            top: Math.min(contextMenu.y, window.innerHeight - 140),
+            left: Math.min(contextMenu.x, window.innerWidth - 170),
             background: '#1e1e2e',
             border: '0.5px solid var(--border)',
             borderRadius: 10,
             overflow: 'hidden',
             zIndex: 100,
-            minWidth: 150,
+            minWidth: 160,
             boxShadow: '0 4px 24px rgba(0,0,0,0.5)',
           }}
         >
+          {/* Reply inline */}
+          <button
+            onClick={() => handleInlineReply(contextMenu.msg)}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 10,
+              width: '100%', padding: '11px 16px',
+              background: 'none', border: 'none', cursor: 'pointer',
+              color: 'var(--text-primary)', fontSize: 13,
+              borderBottom: '0.5px solid var(--border)',
+            }}
+          >
+            <Reply size={14} color="var(--purple)" /> Reply
+          </button>
+
+          {/* Copy */}
           <button
             onClick={() => handleCopy(contextMenu.msg)}
             style={{
@@ -453,11 +571,13 @@ export default function ChatRoom() {
               width: '100%', padding: '11px 16px',
               background: 'none', border: 'none', cursor: 'pointer',
               color: 'var(--text-primary)', fontSize: 13,
-              borderBottom: !isMe(contextMenu.msg.sender_id) ? '0.5px solid var(--border)' : 'none',
+              borderBottom: !isMe(contextMenu.msg.sender_id) && isGroup ? '0.5px solid var(--border)' : 'none',
             }}
           >
             <Copy size={14} color="var(--blue)" /> Copy
           </button>
+
+          {/* Reply Privately — only in group, not your own message */}
           {!isMe(contextMenu.msg.sender_id) && isGroup && (
             <button
               onClick={() => handlePrivateReply(contextMenu.msg)}
