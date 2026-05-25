@@ -90,7 +90,6 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
 
   const isActive = (roomName: string) => pathname === `/chat/${roomName}`
 
-  // Show loading until hydrated
   if (!_hasHydrated) return (
     <div style={{ minHeight: '100vh', background: '#0d1117', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <p style={{ color: '#d4af37', fontSize: 18 }}>Loading...</p>
@@ -98,13 +97,9 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
   )
 
   const Sidebar = (
-    <div style={{
-      width: '100%', height: '100%',
-      display: 'flex', flexDirection: 'column',
-      background: '#1a1a2e', borderRight: '0.5px solid #2a2a4a',
-    }}>
-      {/* Header */}
-      <div style={{ background: '#16213e', padding: '14px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '0.5px solid #2a2a4a' }}>
+    <div className="sidebar" style={{ width: '100%', height: '100%', background: '#1a1a2e', borderRight: '0.5px solid #2a2a4a' }}>
+
+      <div style={{ flexShrink: 0, background: '#16213e', padding: '14px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '0.5px solid #2a2a4a' }}>
         <div>
           <h1 style={{ fontSize: 18, fontWeight: 700, color: '#d4af37' }}>LinguaDuo</h1>
           <p style={{ fontSize: 10, color: '#9b8fd4', marginTop: 1, display: 'flex', alignItems: 'center', gap: 3 }}>
@@ -119,19 +114,16 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
         </div>
       </div>
 
-      {/* Search */}
-      <div style={{ padding: '8px 12px', background: '#16213e', borderBottom: '0.5px solid #2a2a4a' }}>
+      <div style={{ flexShrink: 0, padding: '8px 12px', background: '#16213e', borderBottom: '0.5px solid #2a2a4a' }}>
         <div style={{ background: '#0d1117', borderRadius: 20, padding: '6px 12px', display: 'flex', alignItems: 'center', gap: 6, border: '0.5px solid #2a2a4a' }}>
           <Search size={12} color="#555" />
-          <input value={search} onChange={e => setSearch(e.target.value)}
-            placeholder="Search..."
+          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search..."
             style={{ background: 'none', border: 'none', outline: 'none', color: '#e2e2e2', fontSize: 12, width: '100%' }} />
           {search && <button onClick={() => setSearch('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#555', display: 'flex' }}><X size={12} /></button>}
         </div>
       </div>
 
-      {/* Tabs */}
-      <div style={{ display: 'flex', borderBottom: '0.5px solid #2a2a4a' }}>
+      <div style={{ flexShrink: 0, display: 'flex', borderBottom: '0.5px solid #2a2a4a' }}>
         {(['chats', 'users', 'groups'] as const).map(t => (
           <button key={t} onClick={() => setTab(t)} style={{
             flex: 1, padding: '8px 0', fontSize: 11, fontWeight: 500,
@@ -142,8 +134,7 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
         ))}
       </div>
 
-      {/* List */}
-      <div style={{ flex: 1, overflowY: 'auto' }}>
+      <div className="sidebar-list">
         {tab === 'chats' && (
           allChats.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '40px 16px', color: '#444' }}>
@@ -156,12 +147,7 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
             const active = isActive(c.room_name)
             return (
               <Link key={c.room_name} href={`/chat/${c.room_name}`} style={{ textDecoration: 'none' }}>
-                <div style={{
-                  display: 'flex', alignItems: 'center', gap: 10,
-                  padding: '10px 14px', borderBottom: '0.5px solid #16213e',
-                  background: active ? '#0f3460' : 'transparent', cursor: 'pointer',
-                  transition: 'background 0.15s',
-                }}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', borderBottom: '0.5px solid #16213e', background: active ? '#0f3460' : 'transparent', cursor: 'pointer', transition: 'background 0.15s' }}
                   onMouseEnter={e => { if (!active) e.currentTarget.style.background = '#16213e' }}
                   onMouseLeave={e => { if (!active) e.currentTarget.style.background = 'transparent' }}
                 >
@@ -187,11 +173,7 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
 
         {tab === 'users' && filteredUsers.map(u => (
           <Link key={u.id} href={`/chat/dm_${u.id}`} style={{ textDecoration: 'none' }}>
-            <div style={{
-              display: 'flex', alignItems: 'center', gap: 10,
-              padding: '10px 14px', borderBottom: '0.5px solid #16213e',
-              background: isActive(`dm_${u.id}`) ? '#0f3460' : 'transparent', cursor: 'pointer',
-            }}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', borderBottom: '0.5px solid #16213e', background: isActive(`dm_${u.id}`) ? '#0f3460' : 'transparent', cursor: 'pointer' }}
               onMouseEnter={e => { if (!isActive(`dm_${u.id}`)) e.currentTarget.style.background = '#16213e' }}
               onMouseLeave={e => { if (!isActive(`dm_${u.id}`)) e.currentTarget.style.background = 'transparent' }}
             >
@@ -219,11 +201,7 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
             </Link>
             {convos.groups.map(g => (
               <Link key={g.room_name} href={`/chat/${g.room_name}`} style={{ textDecoration: 'none' }}>
-                <div style={{
-                  display: 'flex', alignItems: 'center', gap: 10,
-                  padding: '10px 14px', borderBottom: '0.5px solid #16213e',
-                  background: isActive(g.room_name) ? '#0f3460' : 'transparent', cursor: 'pointer',
-                }}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', borderBottom: '0.5px solid #16213e', background: isActive(g.room_name) ? '#0f3460' : 'transparent', cursor: 'pointer' }}
                   onMouseEnter={e => { if (!isActive(g.room_name)) e.currentTarget.style.background = '#16213e' }}
                   onMouseLeave={e => { if (!isActive(g.room_name)) e.currentTarget.style.background = 'transparent' }}
                 >
@@ -257,18 +235,18 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
       `}</style>
 
       <div style={{ height: '100vh', background: '#0d1117', display: 'flex', overflow: 'hidden' }}>
-        <div className="sidebar-panel" style={{ height: '100vh', flexDirection: 'column' }}>
+        <div className="sidebar-panel" style={{ height: '100vh', flexDirection: 'column', minHeight: 0, overflow: 'hidden' }}>
           {Sidebar}
         </div>
-        <div className="main-panel" style={{ flex: 1, flexDirection: 'column', height: '100vh', background: '#0d1117' }}>
+        <div className="main-panel" style={{ flex: 1, flexDirection: 'column', height: '100vh', minHeight: 0, background: '#0d1117', overflow: 'hidden' }}>
           {isRoomOpen ? children : (
-            <div style={{ flex: 1, height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-              <div style={{ width: 80, height: 80, borderRadius: '50%', background: '#d4af3710', border: '1.5px solid #d4af3730', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 16 }}>
-                <Globe size={36} color="#d4af3744" />
+              <div style={{ flex: 1, height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ width: 80, height: 80, borderRadius: '50%', background: '#d4af3710', border: '1.5px solid #d4af3730', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 16 }}>
+                  <Globe size={36} color="#d4af3744" />
+                </div>
+                <p style={{ fontSize: 16, color: '#333', fontWeight: 500 }}>LinguaDuo</p>
+                <p style={{ fontSize: 12, color: '#2a2a4a', marginTop: 6 }}>Select a conversation to start chatting</p>
               </div>
-              <p style={{ fontSize: 16, color: '#333', fontWeight: 500 }}>LinguaDuo</p>
-              <p style={{ fontSize: 12, color: '#2a2a4a', marginTop: 6 }}>Select a conversation to start chatting</p>
-            </div>
           )}
         </div>
       </div>

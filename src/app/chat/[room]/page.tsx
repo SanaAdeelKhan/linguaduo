@@ -325,7 +325,7 @@ export default function ChatRoom() {
   }, [])
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg-primary)', display: 'flex', flexDirection: 'column', maxWidth: '100%', position: 'relative' }}>
+    <div className="chat-container">
 
       {/* Header */}
       <div style={{ background: 'var(--bg-tertiary)', padding: '10px 14px', display: 'flex', alignItems: 'center', gap: 10, borderBottom: '0.5px solid var(--border)', position: 'sticky', top: 0, zIndex: 10 }}>
@@ -411,7 +411,8 @@ export default function ChatRoom() {
       )}
 
       {/* Messages */}
-      <div style={{ flex: 1, overflowY: 'auto', padding: '14px', display: 'flex', flexDirection: 'column', gap: 4 }}>
+      <div className="chat-body">
+      <div className="chat-messages">
         {messages.length === 0 && (
           <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--text-dim)' }}>
             <p>No messages yet</p>
@@ -509,8 +510,8 @@ export default function ChatRoom() {
         </div>
       )}
 
-      {/* Input */}
-      <div style={{ background: 'var(--bg-tertiary)', padding: '10px 14px', display: 'flex', alignItems: 'center', gap: 10, borderTop: '0.5px solid var(--border)' }}>
+      </div>{/* end chat-body */}
+      <div className="chat-input-bar" style={{ background: 'var(--bg-tertiary)', padding: '10px 14px', display: 'flex', alignItems: 'center', gap: 10, borderTop: '0.5px solid var(--border)' }}>
         <input
           ref={inputRef}
           value={input} onChange={e => setInput(e.target.value)} onKeyDown={handleKey}

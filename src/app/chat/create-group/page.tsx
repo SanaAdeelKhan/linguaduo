@@ -59,13 +59,16 @@ export default function CreateGroupPage() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg-primary)', display: 'flex', flexDirection: 'column', maxWidth: "100%" }}>
-      <div style={{ background: 'var(--bg-tertiary)', padding: '12px 14px', display: 'flex', alignItems: 'center', gap: 12, borderBottom: '0.5px solid var(--border)' }}>
+    <div style={{ height: '100vh', background: 'var(--bg-primary)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      
+      {/* Header — fixed at top */}
+      <div style={{ flexShrink: 0, background: 'var(--bg-tertiary)', padding: '12px 14px', display: 'flex', alignItems: 'center', gap: 12, borderBottom: '0.5px solid var(--border)' }}>
         <Link href="/chat" style={{ color: 'var(--text-muted)', display: 'flex' }}><ArrowLeft size={20} /></Link>
         <h2 style={{ fontSize: 15, fontWeight: 500, color: 'var(--gold)' }}>Create Group</h2>
       </div>
 
-      <div style={{ flex: 1, overflowY: 'auto', padding: 16, display: 'flex', flexDirection: 'column', gap: 14 }}>
+      {/* Scrollable content */}
+      <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', padding: 16, display: 'flex', flexDirection: 'column', gap: 14 }}>
 
         {/* Group info */}
         <div style={{ background: 'var(--bg-secondary)', borderRadius: 14, padding: 16, border: '0.5px solid var(--border)', display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -80,13 +83,14 @@ export default function CreateGroupPage() {
         </div>
 
         {/* Member selection */}
-        <div style={{ background: 'var(--bg-secondary)', borderRadius: 14, border: '0.5px solid var(--border)', overflow: 'hidden' }}>
+        <div style={{ background: 'var(--bg-secondary)', borderRadius: 14, border: '0.5px solid var(--border)', overflow: 'hidden', display: 'flex', flexDirection: 'column', maxHeight: 'calc(100vh - 380px)' }}>
           <div style={{ padding: '12px 16px', borderBottom: '0.5px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <p style={{ fontSize: 12, fontWeight: 500, color: 'var(--gold)', display: 'flex', alignItems: 'center', gap: 6 }}>
               <Users size={13} /> Add Members
             </p>
             <span style={{ fontSize: 11, color: 'var(--purple)' }}>{selectedIds.length} selected</span>
           </div>
+          <div style={{ overflowY: 'auto', flex: 1 }}>
           {allUsers.map(u => {
             const { bg, color } = getAvatarColor(u.username)
             const selected = selectedIds.includes(u.id)
@@ -108,12 +112,13 @@ export default function CreateGroupPage() {
               </button>
             )
           })}
+          </div>
         </div>
 
         {error && <p style={{ color: 'var(--pink)', fontSize: 13, textAlign: 'center' }}>{error}</p>}
 
         <button onClick={handleCreate} disabled={loading}
-          style={{ background: 'var(--gold)', color: '#1a1a2e', border: 'none', borderRadius: 22, padding: '12px 0', fontSize: 14, fontWeight: 600, cursor: 'pointer', opacity: loading ? 0.6 : 1, transition: 'opacity 0.2s' }}>
+          style={{ flexShrink: 0, background: 'var(--gold)', color: '#1a1a2e', border: 'none', borderRadius: 22, padding: '12px 0', fontSize: 14, fontWeight: 600, cursor: 'pointer', opacity: loading ? 0.6 : 1, transition: 'opacity 0.2s' }}>
           {loading ? 'Creating...' : '🚀 Create Group'}
         </button>
       </div>
