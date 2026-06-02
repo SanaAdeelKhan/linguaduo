@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import api from '@/lib/api'
 import { useAuthStore } from '@/store/authStore'
@@ -9,7 +9,7 @@ import { Globe, Lock, Mail } from 'lucide-react'
 
 const GOOGLE_CLIENT_ID = '711955586340-1vnqlc4apdgr4obpa923as3b7ij185kv.apps.googleusercontent.com'
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const setAuth = useAuthStore((s) => s.setAuth)
@@ -18,14 +18,12 @@ export default function LoginPage() {
   const [showResend, setShowResend] = useState(false)
   const [resending, setResending] = useState(false)
 
-  // Show success message if coming from email verification
   useEffect(() => {
     if (searchParams.get('verified') === '1') {
       toast.success('Email verified! You can now log in.')
     }
   }, [searchParams])
 
-  // Load Google Sign-In script
   useEffect(() => {
     const script = document.createElement('script')
     script.src = 'https://accounts.google.com/gsi/client'
@@ -65,7 +63,8 @@ export default function LoginPage() {
       const { data } = await api.post('/api/auth/login/', form)
       setAuth(data.user, data.access, data.refresh)
       toast.success('Welcome back!')
-      router.push('/')
+      const next = searchParams.get('next')
+      router.push(next || '/')
     } catch (err: any) {
       const error = err.response?.data
       if (err.response?.status === 403 && error?.resend) {
@@ -108,8 +107,6 @@ export default function LoginPage() {
       display: 'flex', flexDirection: 'column',
       alignItems: 'center', justifyContent: 'center', padding: 20,
     }}>
-
-      {/* Logo */}
       <div style={{ textAlign: 'center', marginBottom: 36 }}>
         <div style={{
           width: 64, height: 64, borderRadius: '50%',
@@ -123,7 +120,6 @@ export default function LoginPage() {
         <p style={{ fontSize: 13, color: '#9b8fd4', marginTop: 6 }}>Speak in your language. Understand in theirs.</p>
       </div>
 
-      {/* Card */}
       <div style={{
         width: '100%', maxWidth: 400,
         background: '#1a1a2e', border: '0.5px solid #2a2a4a',
@@ -133,8 +129,6 @@ export default function LoginPage() {
         <p style={{ fontSize: 12, color: '#555', marginBottom: 24 }}>Sign in to continue chatting</p>
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-
-          {/* Email */}
           <div style={{ position: 'relative' }}>
             <Mail size={15} color="#555" style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)' }} />
             <input type="email" value={form.email}
@@ -144,7 +138,6 @@ export default function LoginPage() {
               onBlur={e => e.target.style.border = '0.5px solid #2a2a4a'} />
           </div>
 
-          {/* Password */}
           <div style={{ position: 'relative' }}>
             <Lock size={15} color="#555" style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)' }} />
             <input type="password" value={form.password}
@@ -154,7 +147,6 @@ export default function LoginPage() {
               onBlur={e => e.target.style.border = '0.5px solid #2a2a4a'} />
           </div>
 
-          {/* Unverified email — resend button */}
           {showResend && (
             <div style={{
               background: '#1a0f00', border: '0.5px solid #d4af3744',
@@ -168,7 +160,6 @@ export default function LoginPage() {
             </div>
           )}
 
-          {/* Sign in button */}
           <button type="submit" disabled={loading} style={{
             background: loading ? '#2a2a4a' : '#d4af37',
             color: loading ? '#555' : '#1a1a2e',
@@ -181,14 +172,12 @@ export default function LoginPage() {
           </button>
         </form>
 
-        {/* Divider */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '20px 0' }}>
           <div style={{ flex: 1, height: '0.5px', background: '#2a2a4a' }} />
           <span style={{ fontSize: 11, color: '#444' }}>or</span>
           <div style={{ flex: 1, height: '0.5px', background: '#2a2a4a' }} />
         </div>
 
-        {/* Google Sign-In button */}
         <div id="google-btn" style={{ display: 'flex', justifyContent: 'center', marginBottom: 20 }} />
 
         <p style={{ textAlign: 'center', fontSize: 13, color: '#555' }}>
@@ -203,5 +192,13 @@ export default function LoginPage() {
         🌐 Supports 130+ languages with real-time translation
       </p>
     </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div style={{ minHeight: '100vh', background: '#0d1117' }} />}>
+      <LoginForm />
+    </Suspense>
   )
 }
