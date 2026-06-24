@@ -111,7 +111,7 @@ function LoginForm() {
         <img 
           src="/linguaduo_brandmark.svg" 
           alt="LinguaDuo" 
-          style={{ width: 220, height: 220, objectFit: "none", objectPosition: "50% 0%" }} 
+          style={{ width: 260, height: "auto", objectFit: "contain" }} 
         />
         <div style={{ width: '100%', maxWidth: 400, textAlign: 'center', marginTop: 4 }}>
           <div style={{ fontSize: 32, fontWeight: 600, letterSpacing: 0.5 }}>
