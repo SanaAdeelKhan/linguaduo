@@ -108,16 +108,12 @@ function LoginForm() {
       alignItems: 'center', justifyContent: 'center', padding: 20,
     }}>
       <div style={{ textAlign: 'center', marginBottom: 36 }}>
-        <div style={{
-          width: 64, height: 64, borderRadius: '50%',
-          background: '#d4af3718', border: '1.5px solid #d4af3744',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          margin: '0 auto 16px',
-        }}>
-          <img src="/icon-512x512.png" alt="LinguaDuo" style={{ width: 120, height: 120, objectFit: "contain" }} />
-        </div>
-        <h1 style={{ fontSize: 32, fontWeight: 700, color: '#d4af37', letterSpacing: 0.5 }}>LinguaDuo</h1>
-        <p style={{ fontSize: 13, color: '#9b8fd4', marginTop: 6 }}>Speak in your language. Understand in theirs.</p>
+        <img 
+          src="/icon-512x512.png" 
+          alt="LinguaDuo" 
+          style={{ width: 180, height: 180, objectFit: "contain", marginBottom: 8 }} 
+        />
+        <p style={{ fontSize: 11, color: '#9b8fd4', letterSpacing: 2, textTransform: 'uppercase', marginTop: 4 }}>Every Language · Your Language</p>
       </div>
 
       <div style={{
