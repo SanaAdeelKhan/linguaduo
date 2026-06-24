@@ -107,14 +107,32 @@ function LoginForm() {
       display: 'flex', flexDirection: 'column',
       alignItems: 'center', justifyContent: 'center', padding: 20,
     }}>
-      <div style={{ textAlign: 'center', marginBottom: 36, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 24 }}>
         <img 
           src="/linguaduo_brandmark.svg" 
           alt="LinguaDuo" 
-          style={{ width: 340, height: "auto", objectFit: "contain" }} 
+          style={{ width: 220, height: 220, objectFit: "none", objectPosition: "50% 0%" }} 
         />
+        <div style={{ width: '100%', maxWidth: 400, textAlign: 'center', marginTop: 4 }}>
+          <div style={{ fontSize: 32, fontWeight: 600, letterSpacing: 0.5 }}>
+            <span style={{ color: '#E2B53C' }}>Lingua</span><span style={{ color: '#ffffff' }}>Duo</span>
+          </div>
+          <div style={{ fontSize: 11, color: '#AEB8C4', letterSpacing: 2.5, textTransform: 'uppercase', marginTop: 4 }}>Every Language · Your Language</div>
+          <div style={{ fontSize: 13, marginTop: 8, color: '#ffffff' }}>
+            <span style={{ color: '#E2B53C' }}>سلام</span>
+            <span style={{ color: '#6B7785', margin: '0 6px' }}>•</span>
+            <span>Hola</span>
+            <span style={{ color: '#6B7785', margin: '0 6px' }}>•</span>
+            <span style={{ color: '#E2B53C' }}>你好</span>
+            <span style={{ color: '#6B7785', margin: '0 6px' }}>•</span>
+            <span>Bonjour</span>
+            <span style={{ color: '#6B7785', margin: '0 6px' }}>•</span>
+            <span style={{ color: '#E2B53C' }}>नमस्ते</span>
+            <span style={{ color: '#6B7785', margin: '0 6px' }}>•</span>
+            <span>Ciao</span>
+          </div>
+        </div>
       </div>
-
       <div style={{
         width: '100%', maxWidth: 400,
         background: '#1a1a2e', border: '0.5px solid #2a2a4a',
