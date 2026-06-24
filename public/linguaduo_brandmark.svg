@@ -39,7 +39,7 @@
   <ellipse cx="295" cy="160" rx="38" ry="52" fill="#FFFFFF" opacity="0.14"/>
   <ellipse cx="302" cy="151" rx="14" ry="20" fill="#FFFFFF" opacity="0.18"/>
 
-  <text x="340" y="108" font-family="Arial, sans-serif" font-size="13" fill="#F0F4F8" text-anchor="middle">سلام</text>
+  <text x="340" y="108" font-family="Arial, sans-serif" font-size="13" fill="#F0F4F8" text-anchor="middle">Hello</text>
   <text x="225" y="163" font-family="Arial, sans-serif" font-size="12" fill="#F0F4F8" text-anchor="middle">Hola</text>
   <text x="450" y="160" font-family="Arial, sans-serif" font-size="12" fill="#D6E6F2" text-anchor="middle">Bonjour</text>
   <text x="243" y="213" font-family="Arial, sans-serif" font-size="13" fill="#F0F4F8" text-anchor="middle">你好</text>
@@ -52,7 +52,7 @@
 <circle cx="340" cy="225" r="135" fill="none" stroke="#0A2540" stroke-width="2"/>
 
 <path d="M 392 282 q 0 -14 14 -14 l 108 0 q 14 0 14 14 l 0 54 q 0 14 -14 14 l -76 0 l -20 27 l 4 -27 l -16 0 q -14 0 -14 -14 z" fill="url(#goldgrad)"/>
-<text x="464" y="318" font-family="Arial, sans-serif" font-size="28" font-weight="600" fill="#1B2430" text-anchor="middle">Hello</text>
+<text x="464" y="318" font-family="Arial, sans-serif" font-size="28" font-weight="600" fill="#1B2430" text-anchor="middle">سلام</text>
 
 <text x="340" y="425" font-family="Arial, sans-serif" font-size="46" font-weight="500" text-anchor="middle"><tspan fill="#E2B53C">Lingua</tspan><tspan fill="#FFFFFF">Duo</tspan></text>
 
