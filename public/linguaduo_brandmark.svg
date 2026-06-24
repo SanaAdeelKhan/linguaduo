@@ -1,0 +1,67 @@
+<svg width="680" height="580" viewBox="0 0 680 580" xmlns="http://www.w3.org/2000/svg" role="img">
+<title>LinguaDuo brand mark</title>
+<desc>Globe with hello speech bubble, wordmark, tagline and language strip</desc>
+<defs>
+<linearGradient id="goldgrad" x1="0%" y1="0%" x2="100%" y2="100%">
+<stop offset="0%" stop-color="#E2B53C"/>
+<stop offset="100%" stop-color="#B8860B"/>
+</linearGradient>
+<radialGradient id="globeBg" cx="35%" cy="30%" r="80%">
+<stop offset="0%" stop-color="#3D6E9E"/>
+<stop offset="60%" stop-color="#2A5680"/>
+<stop offset="100%" stop-color="#1B3A5C"/>
+</radialGradient>
+<clipPath id="globeClip5">
+<circle cx="340" cy="225" r="135"/>
+</clipPath>
+</defs>
+
+
+
+<g clip-path="url(#globeClip5)">
+  <circle cx="340" cy="225" r="135" fill="url(#globeBg)"/>
+
+  <path d="M 265 140 Q 288 119 324 126 Q 352 121 370 140 Q 390 146 386 167 Q 402 179 390 197 Q 382 217 358 213 Q 334 226 316 207 Q 291 214 279 191 Q 259 184 257 161 Q 250 148 265 140 Z" fill="#4A7FAC" opacity="0.95"/>
+  <path d="M 308 232 Q 326 227 337 246 Q 344 269 332 290 Q 325 310 308 303 Q 299 277 303 255 Q 297 241 308 232 Z" fill="#4A7FAC" opacity="0.9"/>
+  <path d="M 418 162 Q 439 158 450 174 Q 456 192 440 204 Q 424 207 418 191 Q 409 176 418 162 Z" fill="#4A7FAC" opacity="0.85"/>
+  <path d="M 230 253 Q 248 246 256 266 Q 252 285 233 281 Q 221 266 230 253 Z" fill="#4A7FAC" opacity="0.8"/>
+  <path d="M 432 246 Q 452 242 459 258 Q 455 275 440 271 Q 427 258 432 246 Z" fill="#4A7FAC" opacity="0.8"/>
+  <path d="M 355 153 Q 366 150 370 161 Q 367 172 356 168 Q 350 161 355 153 Z" fill="#4A7FAC" opacity="0.8"/>
+
+  <ellipse cx="340" cy="225" rx="135" ry="135" fill="none" stroke="#7FAFD4" stroke-width="1" opacity="0.55"/>
+  <ellipse cx="340" cy="225" rx="90" ry="135" fill="none" stroke="#7FAFD4" stroke-width="0.8" opacity="0.45"/>
+  <ellipse cx="340" cy="225" rx="45" ry="135" fill="none" stroke="#7FAFD4" stroke-width="0.8" opacity="0.45"/>
+  <ellipse cx="340" cy="225" rx="135" ry="90" fill="none" stroke="#7FAFD4" stroke-width="0.8" opacity="0.4"/>
+  <ellipse cx="340" cy="225" rx="135" ry="45" fill="none" stroke="#7FAFD4" stroke-width="0.8" opacity="0.4"/>
+  <line x1="205" y1="225" x2="475" y2="225" stroke="#9AC4E8" stroke-width="1.5" opacity="0.7"/>
+  <line x1="340" y1="90" x2="340" y2="360" stroke="#7FAFD4" stroke-width="0.8" opacity="0.35"/>
+
+  <ellipse cx="295" cy="160" rx="38" ry="52" fill="#FFFFFF" opacity="0.14"/>
+  <ellipse cx="302" cy="151" rx="14" ry="20" fill="#FFFFFF" opacity="0.18"/>
+
+  <text x="340" y="108" font-family="Arial, sans-serif" font-size="13" fill="#F0F4F8" text-anchor="middle">سلام</text>
+  <text x="225" y="163" font-family="Arial, sans-serif" font-size="12" fill="#F0F4F8" text-anchor="middle">Hola</text>
+  <text x="450" y="160" font-family="Arial, sans-serif" font-size="12" fill="#D6E6F2" text-anchor="middle">Bonjour</text>
+  <text x="243" y="213" font-family="Arial, sans-serif" font-size="13" fill="#F0F4F8" text-anchor="middle">你好</text>
+  <text x="430" y="225" font-family="Arial, sans-serif" font-size="12" fill="#D6E6F2" text-anchor="middle">Ciao</text>
+  <text x="233" y="262" font-family="Arial, sans-serif" font-size="12" fill="#F0F4F8" text-anchor="middle">Olá</text>
+  <text x="340" y="280" font-family="Arial, sans-serif" font-size="12" fill="#F0F4F8" text-anchor="middle">नमस्ते</text>
+  <text x="453" y="280" font-family="Arial, sans-serif" font-size="11" fill="#C9DCEC" text-anchor="middle" opacity="0.85">안녕</text>
+  <text x="262" y="307" font-family="Arial, sans-serif" font-size="11" fill="#D6E6F2" text-anchor="middle">Привет</text>
+</g>
+<circle cx="340" cy="225" r="135" fill="none" stroke="#0A2540" stroke-width="2"/>
+
+<path d="M 392 282 q 0 -14 14 -14 l 108 0 q 14 0 14 14 l 0 54 q 0 14 -14 14 l -76 0 l -20 27 l 4 -27 l -16 0 q -14 0 -14 -14 z" fill="url(#goldgrad)"/>
+<text x="464" y="318" font-family="Arial, sans-serif" font-size="28" font-weight="600" fill="#1B2430" text-anchor="middle">Hello</text>
+
+<text x="340" y="425" font-family="Arial, sans-serif" font-size="46" font-weight="500" text-anchor="middle"><tspan fill="#E2B53C">Lingua</tspan><tspan fill="#FFFFFF">Duo</tspan></text>
+
+<text x="340" y="458" font-family="Arial, sans-serif" font-size="14" fill="#AEB8C4" text-anchor="middle" letter-spacing="2.5">EVERY LANGUAGE · YOUR LANGUAGE</text>
+
+<line x1="250" y1="485" x2="430" y2="485" stroke="#3A4F66" stroke-width="1"/>
+
+<text x="340" y="520" font-family="Arial, sans-serif" font-size="16" text-anchor="middle">
+<tspan fill="#E2B53C">سلام</tspan><tspan fill="#6B7785" dx="9">•</tspan><tspan fill="#FFFFFF" dx="9">Hola</tspan><tspan fill="#6B7785" dx="9">•</tspan><tspan fill="#E2B53C" dx="9">你好</tspan><tspan fill="#6B7785" dx="9">•</tspan><tspan fill="#FFFFFF" dx="9">Bonjour</tspan><tspan fill="#6B7785" dx="9">•</tspan><tspan fill="#E2B53C" dx="9">नमस्ते</tspan><tspan fill="#6B7785" dx="9">•</tspan><tspan fill="#FFFFFF" dx="9">Ciao</tspan>
+</text>
+
+</svg>

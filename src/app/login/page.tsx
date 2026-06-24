@@ -107,13 +107,12 @@ function LoginForm() {
       display: 'flex', flexDirection: 'column',
       alignItems: 'center', justifyContent: 'center', padding: 20,
     }}>
-      <div style={{ textAlign: 'center', marginBottom: 36 }}>
+      <div style={{ textAlign: 'center', marginBottom: 36, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         <img 
-          src="/icon-512x512.png" 
+          src="/linguaduo_brandmark.svg" 
           alt="LinguaDuo" 
-          style={{ width: 180, height: 180, objectFit: "contain", marginBottom: 8 }} 
+          style={{ width: 260, height: 'auto', objectFit: "contain" }} 
         />
-        <p style={{ fontSize: 11, color: '#9b8fd4', letterSpacing: 2, textTransform: 'uppercase', marginTop: 4 }}>Every Language · Your Language</p>
       </div>
 
       <div style={{
