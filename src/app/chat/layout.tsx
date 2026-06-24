@@ -445,7 +445,7 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
           {isRoomOpen ? children : (
               <div style={{ flex: 1, height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
                 <div style={{ width: 80, height: 80, borderRadius: '50%', background: '#d4af3710', border: '1.5px solid #d4af3730', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 16 }}>
-                  <Globe size={36} color="#d4af3744" />
+                  <img src="/icon-48x48.png" alt="LinguaDuo" style={{ width: 64, height: 64, objectFit: "contain" }} />
                 </div>
                 <p style={{ fontSize: 16, color: '#333', fontWeight: 500 }}>LinguaDuo</p>
                 <p style={{ fontSize: 12, color: '#2a2a4a', marginTop: 6 }}>Select a conversation to start chatting</p>

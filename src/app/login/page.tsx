@@ -114,7 +114,7 @@ function LoginForm() {
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           margin: '0 auto 16px',
         }}>
-          <Globe size={28} color="#d4af37" />
+          <img src="/icon-512x512.png" alt="LinguaDuo" style={{ width: 120, height: 120, objectFit: "contain" }} />
         </div>
         <h1 style={{ fontSize: 32, fontWeight: 700, color: '#d4af37', letterSpacing: 0.5 }}>LinguaDuo</h1>
         <p style={{ fontSize: 13, color: '#9b8fd4', marginTop: 6 }}>Speak in your language. Understand in theirs.</p>
