@@ -10,6 +10,7 @@ export const metadata: Metadata = {
   description: 'Speak in your language. Understand in theirs.',
   manifest: '/manifest.json',
   appleWebApp: { capable: true, statusBarStyle: 'default', title: 'LinguaDuo' },
+  icons: { icon: '/icon-192x192.png', apple: '/icon-192x192.png' },
 }
 
 export const viewport: Viewport = {

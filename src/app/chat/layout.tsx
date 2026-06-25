@@ -4,6 +4,7 @@ import { useRouter, usePathname } from 'next/navigation'
 import { useAuthStore } from '@/store/authStore'
 import Link from 'next/link'
 import api from '@/lib/api'
+import LinguaDuoLogo from '@/components/LinguaDuoLogo'
 import { MessageCircle, Users, LogOut, Globe, Search, Plus, X, UserPlus, UserCheck, UserX, Clock, Copy, Check } from 'lucide-react'
 
 interface Conversation {
