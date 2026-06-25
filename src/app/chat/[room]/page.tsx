@@ -349,7 +349,7 @@ export default function ChatRoom() {
             style={{ background: 'none', border: 'none', cursor: 'pointer', color: showMembers ? 'var(--gold)' : 'var(--text-muted)' }}>
             <Users size={18} />
           </button>
-        ) : <Globe size={16} color="var(--text-muted)" />}
+        ) : <img src="/linguaduo_icon_transparent.svg" alt="" style={{ width: 28, height: 28, objectFit: "contain", opacity: 0.6 }} />}
       </div>
 
       {/* Members Panel */}
