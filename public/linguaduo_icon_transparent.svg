@@ -1,0 +1,55 @@
+<svg width="600" height="500" viewBox="0 0 600 500" xmlns="http://www.w3.org/2000/svg" role="img">
+<title>LinguaDuo icon transparent</title>
+<defs>
+<linearGradient id="goldgrad" x1="0%" y1="0%" x2="100%" y2="100%">
+<stop offset="0%" stop-color="#E2B53C"/>
+<stop offset="100%" stop-color="#B8860B"/>
+</linearGradient>
+<radialGradient id="globeBg" cx="35%" cy="30%" r="80%">
+<stop offset="0%" stop-color="#3D6E9E"/>
+<stop offset="60%" stop-color="#2A5680"/>
+<stop offset="100%" stop-color="#1B3A5C"/>
+</radialGradient>
+<clipPath id="gc">
+<circle cx="270" cy="210" r="185"/>
+</clipPath>
+</defs>
+
+<!-- Globe -->
+<g clip-path="url(#gc)">
+  <circle cx="270" cy="210" r="185" fill="url(#globeBg)"/>
+
+  <path d="M 175 105 Q 210 78 260 88 Q 295 82 320 105 Q 348 114 344 143 Q 366 158 348 182 Q 336 208 306 203 Q 276 220 252 196 Q 218 207 202 175 Q 178 167 175 137 Q 164 118 175 105 Z" fill="#4A7FAC" opacity="0.95"/>
+  <path d="M 235 220 Q 258 214 273 238 Q 282 268 265 295 Q 256 320 235 311 Q 223 280 228 253 Q 221 234 235 220 Z" fill="#4A7FAC" opacity="0.9"/>
+  <path d="M 378 140 Q 406 134 420 155 Q 428 178 408 193 Q 388 197 378 172 Q 366 150 378 140 Z" fill="#4A7FAC" opacity="0.85"/>
+  <path d="M 120 248 Q 143 239 154 264 Q 150 290 126 285 Q 110 264 120 248 Z" fill="#4A7FAC" opacity="0.8"/>
+  <path d="M 400 238 Q 425 232 434 252 Q 429 274 410 269 Q 394 252 400 238 Z" fill="#4A7FAC" opacity="0.8"/>
+
+  <ellipse cx="270" cy="210" rx="185" ry="185" fill="none" stroke="#7FAFD4" stroke-width="1.2" opacity="0.55"/>
+  <ellipse cx="270" cy="210" rx="120" ry="185" fill="none" stroke="#7FAFD4" stroke-width="1" opacity="0.45"/>
+  <ellipse cx="270" cy="210" rx="60" ry="185" fill="none" stroke="#7FAFD4" stroke-width="1" opacity="0.45"/>
+  <ellipse cx="270" cy="210" rx="185" ry="120" fill="none" stroke="#7FAFD4" stroke-width="1" opacity="0.4"/>
+  <ellipse cx="270" cy="210" rx="185" ry="60" fill="none" stroke="#7FAFD4" stroke-width="1" opacity="0.4"/>
+  <line x1="85" y1="210" x2="455" y2="210" stroke="#9AC4E8" stroke-width="2" opacity="0.7"/>
+  <line x1="270" y1="25" x2="270" y2="395" stroke="#7FAFD4" stroke-width="1" opacity="0.35"/>
+
+  <ellipse cx="220" cy="145" rx="50" ry="70" fill="#FFFFFF" opacity="0.14"/>
+  <ellipse cx="228" cy="132" rx="18" ry="26" fill="#FFFFFF" opacity="0.18"/>
+
+  <text x="270" y="72" font-family="Arial, sans-serif" font-size="17" fill="#F0F4F8" text-anchor="middle" font-weight="600">Hello</text>
+  <text x="130" y="142" font-family="Arial, sans-serif" font-size="15" fill="#F0F4F8" text-anchor="middle">Hola</text>
+  <text x="408" y="138" font-family="Arial, sans-serif" font-size="15" fill="#D6E6F2" text-anchor="middle">Bonjour</text>
+  <text x="148" y="197" font-family="Arial, sans-serif" font-size="16" fill="#F0F4F8" text-anchor="middle">你好</text>
+  <text x="400" y="212" font-family="Arial, sans-serif" font-size="15" fill="#D6E6F2" text-anchor="middle">Ciao</text>
+  <text x="140" y="258" font-family="Arial, sans-serif" font-size="15" fill="#F0F4F8" text-anchor="middle">Olá</text>
+  <text x="270" y="270" font-family="Arial, sans-serif" font-size="15" fill="#F0F4F8" text-anchor="middle">नमस्ते</text>
+  <text x="408" y="270" font-family="Arial, sans-serif" font-size="13" fill="#C9DCEC" text-anchor="middle" opacity="0.85">안녕</text>
+  <text x="168" y="310" font-family="Arial, sans-serif" font-size="13" fill="#D6E6F2" text-anchor="middle">Привет</text>
+</g>
+<circle cx="270" cy="210" r="185" fill="none" stroke="#1B3A5C" stroke-width="3"/>
+
+<!-- gold Salam bubble -->
+<path d="M 355 300 q 0 -18 18 -18 l 150 0 q 18 0 18 18 l 0 70 q 0 18 -18 18 l -105 0 l -27 36 l 5 -36 l -23 0 q -18 0 -18 -18 z" fill="url(#goldgrad)"/>
+<text x="462" y="347" font-family="Arial, sans-serif" font-size="40" font-weight="700" fill="#1B2430" text-anchor="middle">سلام</text>
+
+</svg>
