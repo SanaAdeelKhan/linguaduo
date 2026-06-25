@@ -121,7 +121,7 @@ function LoginForm() {
           <div style={{ fontSize: 13, marginTop: 8, color: '#ffffff' }}>
             <span style={{ color: '#E2B53C' }}>سلام</span>
             <span style={{ color: '#6B7785', margin: '0 6px' }}>•</span>
-            <span>Hola</span>
+            <span>Hello</span>
             <span style={{ color: '#6B7785', margin: '0 6px' }}>•</span>
             <span style={{ color: '#E2B53C' }}>你好</span>
             <span style={{ color: '#6B7785', margin: '0 6px' }}>•</span>
