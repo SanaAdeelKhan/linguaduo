@@ -107,11 +107,11 @@ function LoginForm() {
       display: 'flex', flexDirection: 'column',
       alignItems: 'center', justifyContent: 'center', padding: 20,
     }}>
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 24 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 8 }}>
         <img 
-          src="/linguaduo_brandmark.svg" 
+          src="/linguaduo_icon_transparent.svg" 
           alt="LinguaDuo" 
-          style={{ width: 260, height: "auto", objectFit: "contain" }} 
+          style={{ width: 220, height: "auto", objectFit: "contain", marginBottom: -40 }} 
         />
         <div style={{ width: '100%', maxWidth: 400, textAlign: 'center', marginTop: 4 }}>
           <div style={{ fontSize: 32, fontWeight: 600, letterSpacing: 0.5 }}>
@@ -139,7 +139,7 @@ function LoginForm() {
         borderRadius: 20, padding: '32px 28px',
       }}>
         <h2 style={{ fontSize: 18, fontWeight: 600, color: '#e2e2e2', marginBottom: 6 }}>Welcome back</h2>
-        <p style={{ fontSize: 12, color: '#555', marginBottom: 24 }}>Sign in to continue chatting</p>
+        <p style={{ fontSize: 12, color: '#555', marginBottom: 8 }}>Sign in to continue chatting</p>
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <div style={{ position: 'relative' }}>
