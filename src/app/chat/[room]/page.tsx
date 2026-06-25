@@ -349,7 +349,13 @@ export default function ChatRoom() {
             style={{ background: 'none', border: 'none', cursor: 'pointer', color: showMembers ? 'var(--gold)' : 'var(--text-muted)' }}>
             <Users size={18} />
           </button>
-        ) : <img src="/linguaduo_icon_transparent.svg" alt="" style={{ width: 28, height: 28, objectFit: "contain", opacity: 0.6 }} />}
+        ) : <span style={{ position: "relative", display: "inline-flex", width: 24, height: 24 }}>
+            <Globe size={20} color="#4a90d9" />
+            <svg width="10" height="9" viewBox="0 0 12 10" fill="none" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" style={{ position: "absolute", bottom: 0, right: 0 }}>
+              <rect x="0" y="0" width="12" height="7.5" rx="1.5" stroke="#d4af37" fill="#0f172a"/>
+              <path d="M3 7.5 L2 10 L6 7.5" stroke="#d4af37" fill="#d4af37"/>
+            </svg>
+          </span>}
       </div>
 
       {/* Members Panel */}
