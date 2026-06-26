@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { useAuthStore } from '@/store/authStore'
+import LinguaDuoLogo from '@/components/LinguaDuoLogo'
 import { ArrowLeft, Send, Globe, Users, X, Plus, Trash2, Copy, CornerUpLeft, Check, Reply } from 'lucide-react'
 import Link from 'next/link'
 import api from '@/lib/api'
@@ -328,7 +329,7 @@ export default function ChatRoom() {
     <div className="chat-container">
 
       {/* Header */}
-      <div style={{ background: 'var(--bg-tertiary)', padding: '10px 14px', display: 'flex', alignItems: 'center', gap: 10, borderBottom: '0.5px solid var(--border)', position: 'sticky', top: 0, zIndex: 10 }}>
+      <div style={{ background: 'var(--bg-tertiary)', padding: '10px 14px', display: 'flex', alignItems: 'center', gap: 10, borderBottom: '0.5px solid var(--border)', flexShrink: 0, zIndex: 10 }}>
         <Link href="/chat" style={{ color: 'var(--text-muted)', display: 'flex' }}>
           <ArrowLeft size={20} />
         </Link>
@@ -349,13 +350,7 @@ export default function ChatRoom() {
             style={{ background: 'none', border: 'none', cursor: 'pointer', color: showMembers ? 'var(--gold)' : 'var(--text-muted)' }}>
             <Users size={18} />
           </button>
-        ) : <span style={{ position: "relative", display: "inline-flex", width: 24, height: 24 }}>
-            <Globe size={20} color="#4a90d9" />
-            <svg width="10" height="9" viewBox="0 0 12 10" fill="none" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" style={{ position: "absolute", bottom: 0, right: 0 }}>
-              <rect x="0" y="0" width="12" height="7.5" rx="1.5" stroke="#d4af37" fill="#0f172a"/>
-              <path d="M3 7.5 L2 10 L6 7.5" stroke="#d4af37" fill="#d4af37"/>
-            </svg>
-          </span>}
+        ) : <LinguaDuoLogo size={20} />}
       </div>
 
       {/* Members Panel */}
