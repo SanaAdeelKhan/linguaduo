@@ -442,7 +442,7 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
         <div className="sidebar-panel" style={{ height: '100vh', flexDirection: 'column', minHeight: 0, overflow: 'hidden' }}>
           {Sidebar}
         </div>
-        <div className="main-panel" style={{ flex: 1, flexDirection: 'column', height: '100vh', minHeight: 0, background: '#0d1117', overflow: 'hidden' }}>
+        <div className="main-panel" style={{ flex: 1, display: 'flex', flexDirection: 'column', height: '100vh', minHeight: 0, background: '#0d1117', overflow: 'hidden' }}>
           {isRoomOpen ? children : (
               <div style={{ flex: 1, height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
                 <img src="/linguaduo_icon_transparent.svg" alt="LinguaDuo" style={{ width: 200, height: 200, objectFit: "contain", marginBottom: 8 }} />
