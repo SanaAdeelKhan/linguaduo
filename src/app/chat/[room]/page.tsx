@@ -412,7 +412,7 @@ export default function ChatRoom() {
       )}
 
       {/* Messages */}
-      <div className="chat-body" style={{ paddingTop: 64 }}>
+      <div className="chat-body" style={{ paddingTop: 80 }}>
       <div className="chat-messages">
         {messages.length === 0 && (
           <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--text-dim)' }}>
