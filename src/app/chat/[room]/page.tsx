@@ -412,8 +412,8 @@ export default function ChatRoom() {
       )}
 
       {/* Messages */}
-      <div className="chat-body" style={{ paddingTop: 100 }}>
-      <div className="chat-messages">
+      <div className="chat-body" style={{}}>
+      <div className="chat-messages" style={{ paddingTop: 100 }}>
         {messages.length === 0 && (
           <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--text-dim)' }}>
             <p>No messages yet</p>
