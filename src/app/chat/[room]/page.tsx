@@ -329,7 +329,7 @@ export default function ChatRoom() {
     <div className="chat-container">
 
       {/* Header */}
-      <div style={{ background: 'var(--bg-tertiary)', padding: '10px 14px', display: 'flex', alignItems: 'center', gap: 10, borderBottom: '0.5px solid var(--border)', flexShrink: 0, zIndex: 10 }}>
+      <div style={{ background: 'var(--bg-tertiary)', padding: '10px 14px', display: 'flex', alignItems: 'center', gap: 10, borderBottom: '0.5px solid var(--border)', position: 'fixed' as const, top: 0, left: 0, right: 0, zIndex: 100 }}>
         <Link href="/chat" style={{ color: 'var(--text-muted)', display: 'flex' }}>
           <ArrowLeft size={20} />
         </Link>
@@ -412,7 +412,7 @@ export default function ChatRoom() {
       )}
 
       {/* Messages */}
-      <div className="chat-body">
+      <div className="chat-body" style={{ paddingTop: 57 }}>
       <div className="chat-messages">
         {messages.length === 0 && (
           <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--text-dim)' }}>
