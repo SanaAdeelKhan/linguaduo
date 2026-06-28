@@ -1,4 +1,5 @@
 'use client'
+export const dynamic = 'force-dynamic'
 // src/app/sso-entry/page.tsx
 // Route: /sso-entry?token=xxx&refresh=yyy&with_id=123
 // GazaBridge frontend redirects here after getting LD tokens from GB backend
