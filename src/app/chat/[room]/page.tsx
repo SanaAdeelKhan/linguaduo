@@ -174,6 +174,7 @@ export default function ChatRoom() {
   const [contextMenu, setContextMenu] = useState<ContextMenu | null>(null)
   const [copiedId, setCopiedId] = useState<number | null>(null)
   const [replyTo, setReplyTo] = useState<Message | null>(null)
+  const [otherOnline, setOtherOnline] = useState(false)
 
   const wsRef = useRef<WebSocket | null>(null)
   const bottomRef = useRef<HTMLDivElement>(null)
@@ -191,7 +192,7 @@ export default function ChatRoom() {
         headers: { Authorization: `Bearer ${access}` }
       })
         .then(r => r.json())
-        .then(data => setRoomTitle(data.username))
+        .then(data => { setRoomTitle(data.username); setOtherOnline(!!data.is_online) })
         .catch(() => setRoomTitle(`User ${otherId}`))
     } else if (roomName?.startsWith('group_')) {
       const groupId = roomName.replace('group_', '')
@@ -208,13 +209,27 @@ export default function ChatRoom() {
 
     const ws = new WebSocket(`${process.env.NEXT_PUBLIC_WS_URL}/ws/chat/${roomName}/?token=${access}`)
     wsRef.current = ws
-    ws.onopen = () => setConnected(true)
+    ws.onopen = () => {
+      setConnected(true)
+      if (roomName?.startsWith('dm_')) {
+        const dmOtherId = roomName.split('_')[1]
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/users/${dmOtherId}/`, {
+          headers: { Authorization: `Bearer ${access}` }
+        }).then(r => r.json()).then(data => setOtherOnline(grep -n onopen ~/linguaduo/src/app/chat/\[room\]/page.tsxdata.is_online)).catch(() => {})
+      }
+    }
     ws.onclose = () => setConnected(false)
     ws.onmessage = (e) => {
       const data = JSON.parse(e.data)
       if (data.type === 'history') {
         setMessages(data.messages)
-      } else if (data.type === 'message') {
+      } else if (data.type === 'online_status') {
+          const dmOtherId = roomName?.startsWith('dm_') ? roomName.split('_')[1] : null
+          if (dmOtherId && String(data.user_id) === String(dmOtherId)) {
+            setOtherOnline(data.is_online)
+          }
+          setMembers(prev => prev.map(m => m.id === data.user_id ? { ...m, is_online: data.is_online } : m))
+        } else if (data.type === 'message') {
         setMessages(prev => {
           if (prev.find(m => m.id === data.message_id)) return prev
           return [...prev, {
@@ -335,7 +350,12 @@ export default function ChatRoom() {
         </Link>
         {isGroup
           ? <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--purple-dim)', color: 'var(--purple)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><Users size={16} /></div>
-          : <Avatar name={roomTitle || '?'} size={36} />
+          : (
+            <div style={{ position: 'relative' }}>
+              <Avatar name={roomTitle || '?'} size={36} />
+              {otherOnline && <div style={{ position: 'absolute', bottom: 0, right: 0, width: 9, height: 9, borderRadius: '50%', background: 'var(--olive)', border: '2px solid var(--bg-tertiary)' }} />}
+            </div>
+          )
         }
         <div style={{ flex: 1 }}>
           <p style={{ fontSize: 14, fontWeight: 500, color: 'var(--text-primary)' }}>{roomTitle || roomName}</p>
