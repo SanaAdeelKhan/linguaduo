@@ -216,6 +216,10 @@ export default function ChatRoom() {
         fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/users/${dmOtherId}/`, {
           headers: { Authorization: `Bearer ${access}` }
         }).then(r => r.json()).then(data => setOtherOnline(!!data.is_online)).catch(() => {})
+        setTimeout(() => {
+          const id2 = roomName?.startsWith('dm_') ? roomName.split('_')[1] : null
+          if (id2) fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/users/${id2}/`, { headers: { Authorization: `Bearer ${access}` } }).then(r => r.json()).then(d => setOtherOnline(!!d.is_online)).catch(() => {})
+        }, 2500)
       }
     }
     ws.onclose = () => setConnected(false)

@@ -1,11 +1,13 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { useAuthStore } from '@/store/authStore'
+import { useUnreadStore } from '@/store/unreadStore'
 import Link from 'next/link'
 import api from '@/lib/api'
 import LinguaDuoLogo from '@/components/LinguaDuoLogo'
-import { MessageCircle, Users, LogOut, Globe, Search, Plus, X, UserPlus, UserCheck, UserX, Clock, Copy, Check } from 'lucide-react'
+import { updateTabBadge } from '@/lib/badge'
+import { MessageCircle, Users, LogOut, Globe, Search, Plus, X, UserPlus, UserCheck, UserX, Clock, Copy, Check, Settings } from 'lucide-react'
 
 interface Conversation {
   type: 'dm' | 'group'
@@ -15,6 +17,7 @@ interface Conversation {
   user?: { id: number; username: string; is_online: boolean; preferred_language: string }
   group?: { id: number; name: string; description: string; is_study_group: boolean }
   role?: string
+  unread_count?: number
 }
 
 const LANG_NAMES: Record<string, string> = {
@@ -54,7 +57,13 @@ function Avatar({ name, isGroup = false, size = 42 }: { name: string; isGroup?: 
 export default function ChatLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const pathname = usePathname()
-  const { user, logout, _hasHydrated } = useAuthStore()
+  const { user, access, logout, _hasHydrated } = useAuthStore()
+  const unreadCounts = useUnreadStore(s => s.counts)
+  const setAllUnread = useUnreadStore(s => s.setAll)
+  const incrementUnread = useUnreadStore(s => s.increment)
+  const totalUnread = useUnreadStore(s => s.total())
+  const inboxWsRef = useRef<WebSocket | null>(null)
+  const pathnameRef = useRef(pathname)
   const [convos, setConvos] = useState<{ dms: Conversation[]; groups: Conversation[] }>({ dms: [], groups: [] })
   const [users, setUsers] = useState<any[]>([])
   const [search, setSearch] = useState('')
@@ -72,12 +81,6 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
 
   const isRoomOpen = pathname !== '/chat'
 
-  useEffect(() => {
-    if (!_hasHydrated) return
-    if (!user) { router.push('/login'); return }
-    loadData()
-  }, [_hasHydrated, user])
-
   const loadData = async () => {
     try {
       const [c, u, pending, contacts, invite] = await Promise.all([
@@ -91,10 +94,45 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
       setUsers(u.data)
       setPendingRequests(pending.data)
       setAcceptedContacts(contacts.data)
+      const counts: Record<string, number> = {}
+      for (const conv of [...c.data.dms, ...c.data.groups]) {
+        if (conv.unread_count) counts[conv.room_name] = conv.unread_count
+      }
+      setAllUnread(counts)
       const token = invite.data.invite_token
       setInviteLink(`${window.location.origin}/invite/${token}`)
     } catch {}
   }
+
+  useEffect(() => {
+    if (!_hasHydrated) return
+    if (!user) { router.push('/login'); return }
+    loadData()
+  }, [_hasHydrated, user])
+
+  useEffect(() => { pathnameRef.current = pathname }, [pathname])
+
+  useEffect(() => { updateTabBadge(totalUnread) }, [totalUnread])
+
+  // Personal notification channel: tells the sidebar about new messages in
+  // ANY room, so badges/tab-title update live even if that room isn't open.
+  useEffect(() => {
+    if (!_hasHydrated || !user || !access) return
+    const ws = new WebSocket(`${process.env.NEXT_PUBLIC_WS_URL}/ws/inbox/?token=${access}`)
+    inboxWsRef.current = ws
+    ws.onmessage = (e) => {
+      const data = JSON.parse(e.data)
+      if (data.type === 'new_message') {
+        const activeRoom = pathnameRef.current?.startsWith('/chat/')
+          ? pathnameRef.current.replace('/chat/', '')
+          : null
+        if (data.room_name !== activeRoom) {
+          incrementUnread(data.room_name)
+        }
+      }
+    }
+    return () => { ws.close() }
+  }, [_hasHydrated, user, access])
 
   const handleLogout = () => { logout(); router.push('/login') }
 
@@ -186,6 +224,9 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <span style={{ fontSize: 12, color: '#888' }}>{user?.username}</span>
+          <Link href="/settings" style={{ color: '#555', display: 'flex' }}>
+            <Settings size={16} />
+          </Link>
           <button onClick={handleLogout} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#555', display: 'flex' }}>
             <LogOut size={16} />
           </button>
@@ -234,6 +275,7 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
           ) : allChats.map(c => {
             const name = c.type === 'dm' ? c.user?.username || '' : c.group?.name || ''
             const active = isActive(c.room_name)
+            const unread = unreadCounts[c.room_name] || 0
             return (
               <Link key={c.room_name} href={`/chat/${c.room_name}`} style={{ textDecoration: 'none' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', borderBottom: '0.5px solid #16213e', background: active ? '#0f3460' : 'transparent', cursor: 'pointer', transition: 'background 0.15s' }}
@@ -242,17 +284,24 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
                 >
                   <Avatar name={name} isGroup={c.type === 'group'} size={38} />
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <span style={{ fontSize: 13, fontWeight: 500, color: '#e2e2e2' }}>{name}</span>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontSize: 13, fontWeight: unread > 0 ? 700 : 500, color: '#e2e2e2' }}>{name}</span>
                       {c.last_message_at && (
                         <span style={{ fontSize: 10, color: '#444' }}>
                           {new Date(c.last_message_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </span>
                       )}
                     </div>
-                    <p style={{ fontSize: 11, color: '#555', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {c.last_message || 'No messages yet'}
-                    </p>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 2 }}>
+                      <p style={{ fontSize: 11, color: unread > 0 ? '#c9c9c9' : '#555', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, minWidth: 0 }}>
+                        {c.last_message || 'No messages yet'}
+                      </p>
+                      {unread > 0 && (
+                        <span style={{ marginLeft: 8, flexShrink: 0, background: '#d4af37', color: '#1a1a2e', borderRadius: 10, minWidth: 18, height: 18, padding: '0 5px', fontSize: 10, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          {unread > 99 ? '99+' : unread}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
               </Link>
