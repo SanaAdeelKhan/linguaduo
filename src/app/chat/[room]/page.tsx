@@ -215,7 +215,7 @@ export default function ChatRoom() {
         const dmOtherId = roomName.split('_')[1]
         fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/users/${dmOtherId}/`, {
           headers: { Authorization: `Bearer ${access}` }
-        }).then(r => r.json()).then(data => setOtherOnline(grep -n onopen ~/linguaduo/src/app/chat/\[room\]/page.tsxdata.is_online)).catch(() => {})
+        }).then(r => r.json()).then(data => setOtherOnline(!!data.is_online)).catch(() => {})
       }
     }
     ws.onclose = () => setConnected(false)
