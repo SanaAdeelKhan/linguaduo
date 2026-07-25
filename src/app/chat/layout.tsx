@@ -7,6 +7,7 @@ import Link from 'next/link'
 import api from '@/lib/api'
 import LinguaDuoLogo from '@/components/LinguaDuoLogo'
 import { updateTabBadge } from '@/lib/badge'
+import { LANG_NAMES } from '@/lib/languages'
 import { MessageCircle, Users, LogOut, Globe, Search, Plus, X, UserPlus, UserCheck, UserX, Clock, Copy, Check, Settings } from 'lucide-react'
 
 interface Conversation {
@@ -20,13 +21,6 @@ interface Conversation {
   unread_count?: number
 }
 
-const LANG_NAMES: Record<string, string> = {
-  en: 'English', ar: 'Arabic', fr: 'French', de: 'German',
-  es: 'Spanish', ur: 'Urdu', hi: 'Hindi', zh: 'Chinese',
-  ja: 'Japanese', ko: 'Korean', tr: 'Turkish', ru: 'Russian',
-  pt: 'Portuguese', it: 'Italian', bn: 'Bengali', pa: 'Punjabi',
-  fa: 'Persian', sw: 'Swahili', ta: 'Tamil', te: 'Telugu',
-}
 
 const AVATAR_COLORS = [
   { bg: '#d4af3722', color: '#d4af37' },

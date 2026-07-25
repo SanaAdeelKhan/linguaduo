@@ -3,25 +3,14 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuthStore } from '@/store/authStore'
 import api from '@/lib/api'
+import { SUPPORTED_LANGUAGES as LANGUAGES } from '@/lib/languages'
 import { ArrowLeft, Save, Trash2, Globe } from 'lucide-react'
 import Link from 'next/link'
 
-const LANGUAGES = [
-  { code: 'en', name: 'English' }, { code: 'ar', name: 'Arabic' },
-  { code: 'fr', name: 'French' }, { code: 'de', name: 'German' },
-  { code: 'es', name: 'Spanish' }, { code: 'ur', name: 'Urdu' },
-  { code: 'hi', name: 'Hindi' }, { code: 'zh', name: 'Chinese' },
-  { code: 'ja', name: 'Japanese' }, { code: 'ko', name: 'Korean' },
-  { code: 'tr', name: 'Turkish' }, { code: 'ru', name: 'Russian' },
-  { code: 'pt', name: 'Portuguese' }, { code: 'it', name: 'Italian' },
-  { code: 'bn', name: 'Bengali' }, { code: 'pa', name: 'Punjabi' },
-  { code: 'fa', name: 'Persian' }, { code: 'sw', name: 'Swahili' },
-  { code: 'ta', name: 'Tamil' }, { code: 'te', name: 'Telugu' },
-]
 
 export default function SettingsPage() {
   const router = useRouter()
-  const { user, access, logout, updateUser } = useAuthStore()
+  const { user, access, logout, updateUser, _hasHydrated } = useAuthStore()
   const [username, setUsername] = useState('')
   const [language, setLanguage] = useState('en')
   const [saving, setSaving] = useState(false)
@@ -32,10 +21,11 @@ export default function SettingsPage() {
   const [deleting, setDeleting] = useState(false)
 
   useEffect(() => {
+    if (!_hasHydrated) return
     if (!user) { router.push('/login'); return }
     setUsername(user.username || '')
     setLanguage(user.preferred_language || 'en')
-  }, [user])
+  }, [user, _hasHydrated])
 
   const handleSave = async () => {
     setSaving(true)
